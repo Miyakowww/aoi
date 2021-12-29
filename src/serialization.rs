@@ -1,7 +1,7 @@
 use crate::runtime::opcode::*;
 use crate::runtime::types::AoType;
 
-pub struct AoAsmSerializer {}
+pub enum AoAsmSerializer {}
 
 impl AoAsmSerializer {
     fn serialize_type(value: &AoType) -> Vec<u8> {
