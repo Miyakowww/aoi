@@ -1,4 +1,4 @@
-use crate::runtime::opcode::*;
+use crate::runtime::opcode::{AoArg, AoOpCode};
 use crate::runtime::types::AoType;
 
 pub enum AoAsmSerializer {}

@@ -1,4 +1,4 @@
-use aoi::runtime::opcode::*;
+use aoi::runtime::opcode::{AoArg, AoOpCode};
 use aoi::runtime::status::AoStatus;
 use aoi::runtime::types::AoType;
 use aoi::runtime::vm::AoVM;
