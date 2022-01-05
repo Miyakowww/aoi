@@ -179,6 +179,8 @@ pub enum AoOpCode {
     ISF,
     ISP,
     ISS,
+
+    ARG(u32),
 }
 
 impl AoOpCode {
@@ -610,6 +612,10 @@ impl AoOpCode {
                     AoType::AoBool(false)
                 };
             }
+
+            AoOpCode::ARG(offset) => {
+                vm.dp = vm.dsb + offset;
+            }
         };
 
         AoStatus::Ok
@@ -677,6 +683,8 @@ impl Display for AoOpCode {
             AoOpCode::ISF => write!(f, "isf"),
             AoOpCode::ISP => write!(f, "isp"),
             AoOpCode::ISS => write!(f, "iss"),
+
+            AoOpCode::ARG(offset) => write!(f, "arg {}", offset),
         }
     }
 }

@@ -1,4 +1,4 @@
-<h1 align="center">Aoi</h1>
+# Aoi
 
 Just an ordinary virtual machine.  
 No documentation, no support, no warranty.  

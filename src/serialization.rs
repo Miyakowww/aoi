@@ -231,6 +231,11 @@ impl AoAsmSerializer {
             AoOpCode::ISS => {
                 result.push(0xA4);
             }
+
+            AoOpCode::ARG(offset) => {
+                result.push(0xB0);
+                result.extend_from_slice(&offset.to_le_bytes());
+            }
         }
         result
     }
@@ -442,6 +447,13 @@ impl AoAsmSerializer {
             0xA2 => Some(AoOpCode::ISF),
             0xA3 => Some(AoOpCode::ISP),
             0xA4 => Some(AoOpCode::ISS),
+
+            0xB0 => {
+                *offset += 4;
+                Some(AoOpCode::ARG(u32::from_le_bytes(
+                    value[*offset - 4..*offset].try_into().unwrap(),
+                )))
+            }
 
             _ => None,
         }
