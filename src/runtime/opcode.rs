@@ -3,18 +3,39 @@ use super::types::*;
 use super::vm::AoVM;
 use std::fmt::Display;
 
+/// The argument of the opcode.
+#[derive(Debug, PartialEq)]
 pub enum AoArg {
+    /// Pointer to the bottom of the stack frame.
     DSB,
+    /// Pointer to the top of the stack.
     DST,
+    /// Program counter.
     PC,
+    /// Pointer for accessing data.
     DP,
+    /// Register for calculation.
     CA,
+    /// Stack.
     DS,
+    /// Global variables.
     GVS,
+    /// Immediate value.
     Imm(AoType),
 }
 
 impl AoArg {
+    /// Returns the value of the argument.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    /// use aoi::runtime::vm::AoVM;
+    ///
+    /// let vm = AoVM::new(|_, _| None, 0);
+    /// assert_eq!(AoArg::CA.get_value(&vm), AoType::default());
+    /// ```
     pub fn get_value(&self, vm: &AoVM) -> AoType {
         match self {
             AoArg::DSB => AoType::AoPtr(vm.dsb as u32),
@@ -28,6 +49,18 @@ impl AoArg {
         }
     }
 
+    /// Sets the value of the argument.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    /// use aoi::runtime::vm::AoVM;
+    ///
+    /// let mut vm = AoVM::new(|_, _| None, 0);
+    /// AoArg::CA.set_value(&mut vm, AoType::AoPtr(0x12345678));
+    /// assert_eq!(vm.ca, AoType::AoPtr(0x12345678));
+    /// ```
     pub fn set_value(&self, vm: &mut AoVM, value: AoType) -> AoStatus {
         match self {
             AoArg::DSB => match value {
@@ -76,36 +109,90 @@ impl AoArg {
 }
 
 impl From<bool> for AoArg {
+    /// Creates an immediate argument from a boolean value.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    ///
+    /// assert_eq!(AoArg::from(true), AoArg::Imm(AoType::AoBool(true)));
+    /// ```
     fn from(t: bool) -> AoArg {
         AoArg::Imm(AoType::AoBool(t))
     }
 }
 
 impl From<i32> for AoArg {
+    /// Creates an immediate argument from an integer value.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    ///
+    /// assert_eq!(AoArg::from(123), AoArg::Imm(AoType::AoInt(123)));
+    /// ```
     fn from(t: i32) -> AoArg {
         AoArg::Imm(AoType::AoInt(t))
     }
 }
 
 impl From<f32> for AoArg {
+    /// Creates an immediate argument from a float value.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    ///
+    /// assert_eq!(AoArg::from(123.0), AoArg::Imm(AoType::AoFloat(123.0)));
+    /// ```
     fn from(t: f32) -> AoArg {
         AoArg::Imm(AoType::AoFloat(t))
     }
 }
 
 impl From<u32> for AoArg {
+    /// Creates an immediate argument from a pointer value.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    ///
+    /// assert_eq!(AoArg::from(0x12345678_u32), AoArg::Imm(AoType::AoPtr(0x12345678)));
+    /// ```
     fn from(t: u32) -> AoArg {
         AoArg::Imm(AoType::AoPtr(t))
     }
 }
 
 impl From<String> for AoArg {
+    /// Creates an immediate argument from a string value.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    ///
+    /// assert_eq!(AoArg::from("hello".to_string()), AoArg::Imm(AoType::AoString("hello".to_string())));
+    /// ```
     fn from(t: String) -> AoArg {
         AoArg::Imm(AoType::AoString(t))
     }
 }
 
 impl From<&str> for AoArg {
+    /// Creates an immediate argument from a string value.
+    ///
+    /// # Examples
+    /// ```
+    /// use aoi::runtime::opcode::AoArg;
+    /// use aoi::runtime::types::AoType;
+    ///
+    /// assert_eq!(AoArg::from("hello"), AoArg::Imm(AoType::AoString("hello".to_string())));
+    /// ```
     fn from(t: &str) -> AoArg {
         AoArg::Imm(AoType::AoString(t.to_string()))
     }
@@ -126,61 +213,107 @@ impl Display for AoArg {
     }
 }
 
+/// Aoi opcode.
 pub enum AoOpCode {
+    /// No operation.
     NOP,
 
+    /// Call a function.
     CALL(u32),
+    /// Return from a function.
     RET,
+    /// Jump to an address.
     JMP(u32),
+    /// Jump to an address if CA is true.
     JT(u32),
+    /// Jump to an address if CA is false.
     JF(u32),
 
+    /// Move the value.
     MOV(AoArg, AoArg),
+    /// Interrupt.
     INT(u8),
 
+    /// Push a value onto the stack.
     PUSH(AoArg),
+    /// Pop a value from the stack and move it to the CA or ignore it.
     POP(bool),
 
+    /// Add the value to the CA.
     ADD(AoArg),
+    /// Subtract the value from the CA.
     SUB(AoArg),
+    /// Multiply the value to the CA.
     MUL(AoArg),
+    /// Divide the value from the CA.
     DIV(AoArg),
-    MOD(AoArg),
+    /// Remainder the value from the CA.
+    REM(AoArg),
+    /// Increment the CA.
     INC,
+    /// Decrement the CA.
     DEC,
 
+    /// Logical and the value to the CA.
     AND(AoArg),
+    /// Logical or the value to the CA.
     OR(AoArg),
+    /// Logical xor the value to the CA.
     XOR(AoArg),
+    /// Logical not the value to the CA.
     NOT,
 
+    /// Bitwise and the value to the CA.
     BAND(AoArg),
+    /// Bitwise or the value to the CA.
     BOR(AoArg),
+    /// Bitwise xor the value to the CA.
     BXOR(AoArg),
+    /// Bitwise not the value to the CA.
     BNOT,
 
+    /// Shift left the value to the CA.
     SHL(AoArg),
+    /// Shift right the value to the CA.
     SHR(AoArg),
 
+    /// Compare if the CA is equal to the value.
     EQU(AoArg),
+    /// Compare if the CA is not equal to the value.
     NEQ(AoArg),
+    /// Compare if the CA is greater than the value.
     GT(AoArg),
+    /// Compare if the CA is less than the value.
     LT(AoArg),
+    /// Compare if the CA is greater than or equal to the value.
     GE(AoArg),
+    /// Compare if the CA is less than or equal to the value.
     LE(AoArg),
 
+    /// Cast the CA to the AoInt type.
     CSI,
+    /// Cast the CA to the AoFloat type.
     CSF,
+    /// Cast the CA to the AoPtr type.
     CSP,
+    /// Cast the CA to the AoString type.
     CSS,
 
+    /// Check if the CA is AoBool.
     ISB,
+    /// Check if the CA is AoInt.
     ISI,
+    /// Check if the CA is AoFloat.
     ISF,
+    /// Check if the CA is AoPtr.
     ISP,
+    /// Check if the CA is AoString.
     ISS,
 
+    /// Set the DP to the DSB + offset to access the argument.
     ARG(u32),
+    /// Set the DSB to the DST - argc to create a new stack frame.
+    CNF(u32),
 }
 
 impl AoOpCode {
@@ -277,7 +410,7 @@ impl AoOpCode {
             }
 
             AoOpCode::ADD(src) => {
-                let res = BIN_OPER_ADD.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() + src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -285,7 +418,7 @@ impl AoOpCode {
                 }
             }
             AoOpCode::SUB(src) => {
-                let res = BIN_OPER_SUB.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() - src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -293,7 +426,7 @@ impl AoOpCode {
                 }
             }
             AoOpCode::MUL(src) => {
-                let res = BIN_OPER_MUL.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() * src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -301,15 +434,15 @@ impl AoOpCode {
                 }
             }
             AoOpCode::DIV(src) => {
-                let res = BIN_OPER_DIV.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() / src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
                     return res;
                 }
             }
-            AoOpCode::MOD(src) => {
-                let res = BIN_OPER_MOD.apply(vm.ca.clone(), src.get_value(vm));
+            AoOpCode::REM(src) => {
+                let res = vm.ca.clone() % src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -374,7 +507,7 @@ impl AoOpCode {
             }
 
             AoOpCode::BAND(src) => {
-                let res = BIN_OPER_BAND.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() & src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -382,7 +515,7 @@ impl AoOpCode {
                 }
             }
             AoOpCode::BOR(src) => {
-                let res = BIN_OPER_BOR.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() | src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -390,7 +523,7 @@ impl AoOpCode {
                 }
             }
             AoOpCode::BXOR(src) => {
-                let res = BIN_OPER_BXOR.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() ^ src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -405,7 +538,7 @@ impl AoOpCode {
                 }
             }
             AoOpCode::SHL(src) => {
-                let res = BIN_OPER_SHL.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() << src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -413,7 +546,7 @@ impl AoOpCode {
                 }
             }
             AoOpCode::SHR(src) => {
-                let res = BIN_OPER_SHR.apply(vm.ca.clone(), src.get_value(vm));
+                let res = vm.ca.clone() >> src.get_value(vm);
                 if let AoStatus::Return(value) = res {
                     vm.ca = value;
                 } else {
@@ -616,6 +749,9 @@ impl AoOpCode {
             AoOpCode::ARG(offset) => {
                 vm.dp = vm.dsb + offset;
             }
+            AoOpCode::CNF(argc) => {
+                vm.dsb = vm.ds.len() as u32 - argc;
+            }
         };
 
         AoStatus::Ok
@@ -649,7 +785,7 @@ impl Display for AoOpCode {
             AoOpCode::SUB(src) => write!(f, "sub {}", src),
             AoOpCode::MUL(src) => write!(f, "mul {}", src),
             AoOpCode::DIV(src) => write!(f, "div {}", src),
-            AoOpCode::MOD(src) => write!(f, "mod {}", src),
+            AoOpCode::REM(src) => write!(f, "rem {}", src),
             AoOpCode::INC => write!(f, "inc"),
             AoOpCode::DEC => write!(f, "dec"),
 
@@ -685,6 +821,7 @@ impl Display for AoOpCode {
             AoOpCode::ISS => write!(f, "iss"),
 
             AoOpCode::ARG(offset) => write!(f, "arg {}", offset),
+            AoOpCode::CNF(argc) => write!(f, "cnf {}", argc),
         }
     }
 }

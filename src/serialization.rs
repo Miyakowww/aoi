@@ -1,6 +1,7 @@
 use crate::runtime::opcode::{AoArg, AoOpCode};
 use crate::runtime::types::AoType;
 
+/// Serializer for serializing and deserializing the Aoi assembly.
 pub enum AoAsmSerializer {}
 
 impl AoAsmSerializer {
@@ -126,7 +127,7 @@ impl AoAsmSerializer {
                 result.push(0x43);
                 result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
             }
-            AoOpCode::MOD(src) => {
+            AoOpCode::REM(src) => {
                 result.push(0x44);
                 result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
             }
@@ -235,6 +236,10 @@ impl AoAsmSerializer {
             AoOpCode::ARG(offset) => {
                 result.push(0xB0);
                 result.extend_from_slice(&offset.to_le_bytes());
+            }
+            AoOpCode::CNF(argc) => {
+                result.push(0xB1);
+                result.extend_from_slice(&argc.to_le_bytes());
             }
         }
         result
@@ -370,7 +375,7 @@ impl AoAsmSerializer {
             }
             0x44 => {
                 let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::MOD(src))
+                Some(AoOpCode::REM(src))
             }
             0x45 => Some(AoOpCode::INC),
             0x46 => Some(AoOpCode::DEC),
@@ -451,6 +456,12 @@ impl AoAsmSerializer {
             0xB0 => {
                 *offset += 4;
                 Some(AoOpCode::ARG(u32::from_le_bytes(
+                    value[*offset - 4..*offset].try_into().unwrap(),
+                )))
+            }
+            0xB1 => {
+                *offset += 4;
+                Some(AoOpCode::CNF(u32::from_le_bytes(
                     value[*offset - 4..*offset].try_into().unwrap(),
                 )))
             }

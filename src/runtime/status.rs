@@ -1,23 +1,38 @@
 use super::types::AoType;
+use std::cmp::PartialEq;
 use std::fmt::Display;
 
+/// Status in the runtime.
+#[derive(Debug, PartialEq)]
 pub enum AoStatus {
+    /// The program is running or the operation executed successfully.
     Ok,
+    /// The program is finished.
     Exit,
+    /// The operation returned a value.
     Return(AoType),
 
+    /// The data stack not match the expected type.
     BadDataStack,
 
+    /// The call stack is full.
     CallStackOverflow,
+    /// The call stack is empty.
     CallStackUnderflow,
+    /// The data stack is full.
     DataStackOverflow,
+    /// The data stack is empty.
     DataStackUnderflow,
 
+    /// Try to set the type-restricted register to a different type value.
     SetValueInvalidType(String),
+    /// Try to write to a read-only register or immediate value.
     SetValueInvalidTarget(String),
 
+    /// Attempt to perform an incompatible operation between two types.
     InvalidOperation(String),
 
+    /// Internal error.
     InternalError,
 }
 
