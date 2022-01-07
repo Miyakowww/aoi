@@ -1,6 +1,7 @@
-use super::types::AoType;
 use std::cmp::PartialEq;
 use std::fmt::Display;
+
+use super::types::AoType;
 
 /// Status in the runtime.
 #[derive(Debug, PartialEq)]

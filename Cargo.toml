@@ -1,6 +1,8 @@
 [package]
 name = "aoi"
 version = "0.1.0"
+authors = ["Miyakowww"]
 edition = "2021"
+license = "MIT"
 
 [dependencies]

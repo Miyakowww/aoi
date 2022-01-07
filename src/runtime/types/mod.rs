@@ -1,9 +1,10 @@
 mod bin_oper;
 
-use super::status::AoStatus;
-use bin_oper::*;
 use std::fmt::Display;
 use std::ops::*;
+
+use super::status::AoStatus;
+use bin_oper::*;
 
 /// The data type of the AOI virtual machine.
 #[derive(Clone, Debug, PartialEq)]

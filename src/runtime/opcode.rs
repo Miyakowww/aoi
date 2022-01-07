@@ -1,7 +1,8 @@
+use std::fmt::Display;
+
 use super::status::AoStatus;
 use super::types::*;
 use super::vm::AoVM;
-use std::fmt::Display;
 
 /// The argument of the opcode.
 #[derive(Debug, PartialEq)]
