@@ -35,12 +35,6 @@ fn hello_aoi() {
         AoOpCode::INT(1),                          // int 1
     ];
 
-    // print Aoi assembly
-    for op in &program {
-        println!("{}", op);
-    }
-    println!("");
-
     // run
     let status = vm.run(&program);
     if let AoStatus::Exit = status {

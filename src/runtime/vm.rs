@@ -94,17 +94,24 @@ impl AoVM {
 
     /// Use the VM to execute a program.
     pub fn run(&mut self, program: &Vec<AoOpCode>) -> AoStatus {
-        while self.pc < program.len() as u32 {
-            let current = self.pc as usize;
-            self.pc += 1;
-            let status = program[current].execute(self);
+        loop {
+            let status = self.step(program);
             match status {
                 AoStatus::Ok => (),
                 _ => return status,
             }
         }
+    }
 
-        AoStatus::Exit
+    /// Go one step in the program.
+    pub fn step(&mut self, program: &Vec<AoOpCode>) -> AoStatus {
+        if self.pc < program.len() as u32 {
+            let current = self.pc as usize;
+            self.pc += 1;
+            program[current].execute(self)
+        } else {
+            AoStatus::Exit
+        }
     }
 
     /// Reset the VM.
