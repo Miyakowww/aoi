@@ -72,24 +72,24 @@ impl AoAsmSerializer {
                 result.push(0x00);
             }
 
-            AoOpCode::CALL(value) => {
+            AoOpCode::CALL(addr) => {
                 result.push(0x10);
-                result.extend_from_slice(&value.to_le_bytes());
+                result.extend_from_slice(&addr.to_le_bytes());
             }
             AoOpCode::RET => {
                 result.push(0x11);
             }
-            AoOpCode::JMP(value) => {
+            AoOpCode::JMP(addr) => {
                 result.push(0x12);
-                result.extend_from_slice(&value.to_le_bytes());
+                result.extend_from_slice(&addr.to_le_bytes());
             }
-            AoOpCode::JT(value) => {
+            AoOpCode::JT(addr) => {
                 result.push(0x13);
-                result.extend_from_slice(&value.to_le_bytes());
+                result.extend_from_slice(&addr.to_le_bytes());
             }
-            AoOpCode::JF(value) => {
+            AoOpCode::JF(addr) => {
                 result.push(0x14);
-                result.extend_from_slice(&value.to_le_bytes());
+                result.extend_from_slice(&addr.to_le_bytes());
             }
 
             AoOpCode::MOV(dst, src) => {
@@ -97,18 +97,18 @@ impl AoAsmSerializer {
                 result.extend_from_slice(&AoAsmSerializer::serialize_arg(dst));
                 result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
             }
-            AoOpCode::INT(val) => {
+            AoOpCode::INT(id) => {
                 result.push(0x21);
-                result.extend_from_slice(&val.to_le_bytes());
+                result.extend_from_slice(&id.to_le_bytes());
             }
 
-            AoOpCode::PUSH(value) => {
+            AoOpCode::PUSH(src) => {
                 result.push(0x30);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(value));
+                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
             }
-            AoOpCode::POP(value) => {
+            AoOpCode::POP(save) => {
                 result.push(0x31);
-                result.push(if *value { 0x01 } else { 0x00 });
+                result.push(if *save { 0x01 } else { 0x00 });
             }
 
             AoOpCode::ADD(src) => {

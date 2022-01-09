@@ -764,11 +764,11 @@ impl Display for AoOpCode {
         match self {
             AoOpCode::NOP => write!(f, "nop"),
 
-            AoOpCode::CALL(target) => write!(f, "call {}", target),
+            AoOpCode::CALL(addr) => write!(f, "call {}", addr),
             AoOpCode::RET => write!(f, "ret"),
-            AoOpCode::JMP(target) => write!(f, "jmp {}", target),
-            AoOpCode::JT(target) => write!(f, "jt {}", target),
-            AoOpCode::JF(target) => write!(f, "jf {}", target),
+            AoOpCode::JMP(addr) => write!(f, "jmp {}", addr),
+            AoOpCode::JT(addr) => write!(f, "jt {}", addr),
+            AoOpCode::JF(addr) => write!(f, "jf {}", addr),
 
             AoOpCode::MOV(dst, src) => write!(f, "mov {},{}", dst, src),
             AoOpCode::INT(id) => write!(f, "int {}", id),
