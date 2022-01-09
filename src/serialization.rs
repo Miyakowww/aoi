@@ -245,7 +245,7 @@ impl AoAsmSerializer {
         result
     }
 
-    pub fn serialize(asm: &Vec<AoOpCode>) -> Vec<u8> {
+    pub fn serialize(asm: &[AoOpCode]) -> Vec<u8> {
         let mut result = Vec::new();
         for opcode in asm {
             result.extend_from_slice(&AoAsmSerializer::serialize_opcode(opcode));
@@ -441,7 +441,7 @@ impl AoAsmSerializer {
                 let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
                 Some(AoOpCode::LE(src))
             }
-            
+
             0x90 => Some(AoOpCode::CSI),
             0x91 => Some(AoOpCode::CSF),
             0x92 => Some(AoOpCode::CSP),

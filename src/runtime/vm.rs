@@ -31,7 +31,7 @@ impl AoVM {
 
             interrupt: int,
         };
-        vm.gvs.resize_with(gv_count as usize, || AoType::default());
+        vm.gvs.resize_with(gv_count as usize, AoType::default);
         vm
     }
 
@@ -93,7 +93,7 @@ impl AoVM {
     }
 
     /// Use the VM to execute a program.
-    pub fn run(&mut self, program: &Vec<AoOpCode>) -> AoStatus {
+    pub fn run(&mut self, program: &[AoOpCode]) -> AoStatus {
         loop {
             let status = self.step(program);
             match status {
@@ -104,7 +104,7 @@ impl AoVM {
     }
 
     /// Go one step in the program.
-    pub fn step(&mut self, program: &Vec<AoOpCode>) -> AoStatus {
+    pub fn step(&mut self, program: &[AoOpCode]) -> AoStatus {
         if self.pc < program.len() as u32 {
             let current = self.pc as usize;
             self.pc += 1;

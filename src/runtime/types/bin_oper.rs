@@ -12,95 +12,56 @@ pub struct AoTypeBinOper {
 }
 
 impl AoTypeBinOper {
-    fn throw(&self, left: AoType, right: AoType) -> AoStatus {
-        AoStatus::InvalidOperation(format!("{} {} {}", left, self.name, right))
-    }
-
-    fn apply_bool(&self, left: bool, right: bool) -> Option<bool> {
-        match self.bool_oper {
-            Some(oper) => Some(oper(left, right)),
-            None => None,
-        }
-    }
-
-    fn apply_int(&self, left: i32, right: i32) -> Option<i32> {
-        match self.int_oper {
-            Some(oper) => Some(oper(left, right)),
-            None => None,
-        }
-    }
-
-    fn apply_float(&self, left: f32, right: f32) -> Option<f32> {
-        match self.float_oper {
-            Some(oper) => Some(oper(left, right)),
-            None => None,
-        }
-    }
-
-    fn apply_ptr(&self, left: u32, right: u32) -> Option<u32> {
-        match self.ptr_oper {
-            Some(oper) => Some(oper(left, right)),
-            None => None,
-        }
-    }
-
-    fn apply_string(&self, left: &String, right: &String) -> Option<String> {
-        match self.string_oper {
-            Some(oper) => Some(oper(left, right)),
-            None => None,
-        }
-    }
-
     pub fn apply(&self, left: AoType, right: AoType) -> AoStatus {
         match (&left, &right) {
             (AoType::AoBool(l), AoType::AoBool(r)) => {
-                if let Some(res) = self.apply_bool(*l, *r) {
+                if let Some(res) = self.bool_oper.map(|oper| oper(*l, *r)) {
                     return AoStatus::Return(AoType::AoBool(res));
                 }
             }
             (AoType::AoInt(l), AoType::AoInt(r)) => {
-                if let Some(res) = self.apply_int(*l, *r) {
+                if let Some(res) = self.int_oper.map(|oper| oper(*l, *r)) {
                     return AoStatus::Return(AoType::AoInt(res));
                 }
             }
             (AoType::AoFloat(l), AoType::AoInt(r)) => {
-                if let Some(res) = self.apply_float(*l, *r as f32) {
+                if let Some(res) = self.float_oper.map(|oper| oper(*l, *r as f32)) {
                     return AoStatus::Return(AoType::AoFloat(res));
                 }
             }
             (AoType::AoInt(l), AoType::AoFloat(r)) => {
-                if let Some(res) = self.apply_float(*l as f32, *r) {
+                if let Some(res) = self.float_oper.map(|oper| oper(*l as f32, *r)) {
                     return AoStatus::Return(AoType::AoFloat(res));
                 }
             }
             (AoType::AoFloat(l), AoType::AoFloat(r)) => {
-                if let Some(res) = self.apply_float(*l, *r) {
+                if let Some(res) = self.float_oper.map(|oper| oper(*l, *r)) {
                     return AoStatus::Return(AoType::AoFloat(res));
                 }
             }
             (AoType::AoPtr(l), AoType::AoPtr(r)) => {
-                if let Some(res) = self.apply_ptr(*l, *r) {
+                if let Some(res) = self.ptr_oper.map(|oper| oper(*l, *r)) {
                     return AoStatus::Return(AoType::AoPtr(res));
                 }
             }
             (AoType::AoPtr(l), AoType::AoInt(r)) => {
-                if let Some(res) = self.apply_ptr(*l, *r as u32) {
+                if let Some(res) = self.ptr_oper.map(|oper| oper(*l, *r as u32)) {
                     return AoStatus::Return(AoType::AoPtr(res));
                 }
             }
             (AoType::AoInt(l), AoType::AoPtr(r)) => {
-                if let Some(res) = self.apply_int(*l, *r as i32) {
+                if let Some(res) = self.int_oper.map(|oper| oper(*l, *r as i32)) {
                     return AoStatus::Return(AoType::AoInt(res));
                 }
             }
             (AoType::AoString(l), AoType::AoString(r)) => {
-                if let Some(res) = self.apply_string(l, r) {
+                if let Some(res) = self.string_oper.map(|oper| oper(l, r)) {
                     return AoStatus::Return(AoType::AoString(res));
                 }
             }
             _ => (),
         };
-        self.throw(left, right)
+        AoStatus::InvalidOperation(format!("{} {} {}", left, self.name, right))
     }
 }
 

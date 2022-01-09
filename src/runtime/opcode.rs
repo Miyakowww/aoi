@@ -330,14 +330,14 @@ impl AoOpCode {
                 vm.pc = *addr;
             }
             AoOpCode::RET => {
-                if vm.cs.len() < 1 {
+                if vm.cs.is_empty() {
                     return AoStatus::CallStackUnderflow;
                 }
 
                 let dsb = vm.dsb - 1;
                 if let AoType::AoPtr(ptr) = vm.ds[dsb as usize] {
                     vm.dsb = ptr;
-                    vm.ds.resize_with(dsb as usize, || AoType::default());
+                    vm.ds.resize_with(dsb as usize, AoType::default);
                     vm.pc = vm.cs.pop().unwrap();
                 } else {
                     return AoStatus::BadDataStack;
@@ -388,7 +388,7 @@ impl AoOpCode {
                 let dsb = vm.dsb - 1;
                 if let AoType::AoPtr(ptr) = vm.ds[dsb as usize] {
                     vm.dsb = ptr;
-                    vm.ds.resize_with(dsb as usize, || AoType::default());
+                    vm.ds.resize_with(dsb as usize, AoType::default);
                 } else {
                     return AoStatus::BadDataStack;
                 }
