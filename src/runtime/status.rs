@@ -38,27 +38,27 @@ pub enum AoStatus {
 }
 
 impl Display for AoStatus {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AoStatus::Ok => write!(formatter, "Ok"),
-            AoStatus::Exit => write!(formatter, "Exit"),
-            AoStatus::Return(v) => write!(formatter, "Return({})", v),
+            AoStatus::Ok => write!(f, "Ok"),
+            AoStatus::Exit => write!(f, "Exit"),
+            AoStatus::Return(v) => write!(f, "Return({})", v),
 
-            AoStatus::BadDataStack => write!(formatter, "Bad Data Stack"),
+            AoStatus::BadDataStack => write!(f, "Bad Data Stack"),
 
-            AoStatus::CallStackOverflow => write!(formatter, "Call Stack Overflow"),
-            AoStatus::CallStackUnderflow => write!(formatter, "Call Stack Underflow"),
-            AoStatus::DataStackOverflow => write!(formatter, "Data Stack Overflow"),
-            AoStatus::DataStackUnderflow => write!(formatter, "Data Stack Underflow"),
+            AoStatus::CallStackOverflow => write!(f, "Call Stack Overflow"),
+            AoStatus::CallStackUnderflow => write!(f, "Call Stack Underflow"),
+            AoStatus::DataStackOverflow => write!(f, "Data Stack Overflow"),
+            AoStatus::DataStackUnderflow => write!(f, "Data Stack Underflow"),
 
-            AoStatus::SetValueInvalidType(v) => write!(formatter, "Set Value Invalid Type({})", v),
+            AoStatus::SetValueInvalidType(v) => write!(f, "Set Value Invalid Type({})", v),
             AoStatus::SetValueInvalidTarget(v) => {
-                write!(formatter, "Set Value Invalid Target({})", v)
+                write!(f, "Set Value Invalid Target({})", v)
             }
 
-            AoStatus::InvalidOperation(v) => write!(formatter, "Invalid Operation({})", v),
+            AoStatus::InvalidOperation(v) => write!(f, "Invalid Operation({})", v),
 
-            AoStatus::InternalError => write!(formatter, "Internal Error"),
+            AoStatus::InternalError => write!(f, "Internal Error"),
         }
     }
 }

@@ -83,35 +83,31 @@ fn single_step() {
     }
 }
 
+macro_rules! compare_disp {
+    ( $name:ident, $now:ident, $bak:ident, $( $fi:tt )+ ) => {
+        print!(stringify!($name));
+        if $now.$($fi)+ != $bak.$($fi)+ {
+            print!(": \x1b[38;5;208m{}\x1b[0m", $now.$($fi)+);
+        } else {
+            print!(": {}", $now.$($fi)+);
+        }
+    };
+}
+
 fn display_vm_status(vm: &AoVM, vm_bak: &AoVM) {
     println!("\n[VM Status]");
 
-    if vm.pc != vm_bak.pc {
-        println!("PC: \x1b[38;5;208m{}\x1b[0m", vm.pc);
-    } else {
-        println!("PC: {}", vm.pc);
-    }
-    if vm.ca != vm_bak.ca {
-        println!("CA: \x1b[38;5;208m{}\x1b[0m", vm.ca);
-    } else {
-        println!("CA: {}", vm.ca);
-    }
+    compare_disp!(PC, vm, vm_bak, pc);
+    print!("\n");
+    compare_disp!(CA, vm, vm_bak, ca);
+    print!("\n");
 
-    if vm.dp != vm_bak.dp {
-        print!("DP: \x1b[38;5;208m{}\x1b[0m, ", vm.dp);
-    } else {
-        print!("DP: {}, ", vm.dp);
-    }
-    if vm.dsb != vm_bak.dsb {
-        print!("DSB: \x1b[38;5;208m{}\x1b[0m, ", vm.dsb);
-    } else {
-        print!("DSB: {}, ", vm.dsb);
-    }
-    if vm.ds.len() != vm_bak.ds.len() {
-        println!("DST: \x1b[38;5;208m{}\x1b[0m", vm.ds.len());
-    } else {
-        println!("DST: {}", vm.ds.len());
-    }
+    compare_disp!(DP, vm, vm_bak, dp);
+    print!(", ");
+    compare_disp!(DSB, vm, vm_bak, dsb);
+    print!(", ");
+    compare_disp!(DST, vm, vm_bak, ds.len());
+    print!("\n");
 
     print!("DS: ");
     for i in 0..vm.ds.len() {

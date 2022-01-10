@@ -109,107 +109,39 @@ impl AoArg {
     }
 }
 
-impl From<bool> for AoArg {
-    /// Creates an immediate argument from a boolean value.
-    ///
-    /// # Examples
-    /// ```
-    /// use aoi::runtime::opcode::AoArg;
-    /// use aoi::runtime::types::AoType;
-    ///
-    /// assert_eq!(AoArg::from(true), AoArg::Imm(AoType::AoBool(true)));
-    /// ```
-    fn from(t: bool) -> AoArg {
-        AoArg::Imm(AoType::AoBool(t))
-    }
+macro_rules! impl_from {
+    ( $at:ident, $rt:ty ) => {
+        impl From<$rt> for AoArg {
+            fn from(t: $rt) -> AoArg {
+                AoArg::Imm(AoType::$at(t))
+            }
+        }
+    };
 }
 
-impl From<i32> for AoArg {
-    /// Creates an immediate argument from an integer value.
-    ///
-    /// # Examples
-    /// ```
-    /// use aoi::runtime::opcode::AoArg;
-    /// use aoi::runtime::types::AoType;
-    ///
-    /// assert_eq!(AoArg::from(123), AoArg::Imm(AoType::AoInt(123)));
-    /// ```
-    fn from(t: i32) -> AoArg {
-        AoArg::Imm(AoType::AoInt(t))
-    }
-}
-
-impl From<f32> for AoArg {
-    /// Creates an immediate argument from a float value.
-    ///
-    /// # Examples
-    /// ```
-    /// use aoi::runtime::opcode::AoArg;
-    /// use aoi::runtime::types::AoType;
-    ///
-    /// assert_eq!(AoArg::from(123.0), AoArg::Imm(AoType::AoFloat(123.0)));
-    /// ```
-    fn from(t: f32) -> AoArg {
-        AoArg::Imm(AoType::AoFloat(t))
-    }
-}
-
-impl From<u32> for AoArg {
-    /// Creates an immediate argument from a pointer value.
-    ///
-    /// # Examples
-    /// ```
-    /// use aoi::runtime::opcode::AoArg;
-    /// use aoi::runtime::types::AoType;
-    ///
-    /// assert_eq!(AoArg::from(0x12345678_u32), AoArg::Imm(AoType::AoPtr(0x12345678)));
-    /// ```
-    fn from(t: u32) -> AoArg {
-        AoArg::Imm(AoType::AoPtr(t))
-    }
-}
-
-impl From<String> for AoArg {
-    /// Creates an immediate argument from a string value.
-    ///
-    /// # Examples
-    /// ```
-    /// use aoi::runtime::opcode::AoArg;
-    /// use aoi::runtime::types::AoType;
-    ///
-    /// assert_eq!(AoArg::from("hello".to_string()), AoArg::Imm(AoType::AoString("hello".to_string())));
-    /// ```
-    fn from(t: String) -> AoArg {
-        AoArg::Imm(AoType::AoString(t))
-    }
-}
+impl_from!(AoBool, bool);
+impl_from!(AoInt, i32);
+impl_from!(AoFloat, f32);
+impl_from!(AoPtr, u32);
+impl_from!(AoString, String);
 
 impl From<&str> for AoArg {
-    /// Creates an immediate argument from a string value.
-    ///
-    /// # Examples
-    /// ```
-    /// use aoi::runtime::opcode::AoArg;
-    /// use aoi::runtime::types::AoType;
-    ///
-    /// assert_eq!(AoArg::from("hello"), AoArg::Imm(AoType::AoString("hello".to_string())));
-    /// ```
     fn from(t: &str) -> AoArg {
         AoArg::Imm(AoType::AoString(t.to_string()))
     }
 }
 
 impl Display for AoArg {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AoArg::DSB => write!(formatter, "dsb"),
-            AoArg::DST => write!(formatter, "dst"),
-            AoArg::PC => write!(formatter, "pc"),
-            AoArg::DP => write!(formatter, "dp"),
-            AoArg::CA => write!(formatter, "ca"),
-            AoArg::DS => write!(formatter, "ds"),
-            AoArg::GVS => write!(formatter, "gvs"),
-            AoArg::Imm(value) => write!(formatter, "{}", value),
+            AoArg::DSB => write!(f, "dsb"),
+            AoArg::DST => write!(f, "dst"),
+            AoArg::PC => write!(f, "pc"),
+            AoArg::DP => write!(f, "dp"),
+            AoArg::CA => write!(f, "ca"),
+            AoArg::DS => write!(f, "ds"),
+            AoArg::GVS => write!(f, "gvs"),
+            AoArg::Imm(v) => write!(f, "{}", v),
         }
     }
 }

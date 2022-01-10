@@ -65,527 +65,222 @@ impl AoTypeBinOper {
     }
 }
 
-pub static BIN_OPER_ADD: AoTypeBinOper = AoTypeBinOper {
-    name: "+",
-    bool_oper: Some(|l, r| l || r),
-    int_oper: Some(|l, r| l + r),
-    float_oper: Some(|l, r| l + r),
-    ptr_oper: Some(|l, r| l + r),
+static BIN_OPER_NONE: AoTypeBinOper = AoTypeBinOper {
+    name: "",
+    bool_oper: None,
+    int_oper: None,
+    float_oper: None,
+    ptr_oper: None,
+    string_oper: None,
+};
+
+macro_rules! bop {
+    ( $name:ident, $dname:tt, $( $fname:ident : $fvalue:expr ),*, ) => {
+        #[allow(clippy::needless_update)]
+        pub static $name: AoTypeBinOper = AoTypeBinOper {
+            name: stringify!($dname),
+            $(
+                $fname: $fvalue,
+            )*
+            ..BIN_OPER_NONE
+        };
+    };
+}
+
+macro_rules! op {
+    ( $op:tt ) => {
+        Some(|l, r| l $op r)
+    };
+}
+
+bop!(BIN_OPER_ADD, +,
+    bool_oper: op!(||),
+    int_oper: op!(+),
+    float_oper: op!(+),
+    ptr_oper: op!(+),
     string_oper: Some(|l, r| format!("{}{}", l, r)),
-};
+);
 
-pub static BIN_OPER_SUB: AoTypeBinOper = AoTypeBinOper {
-    name: "-",
-    bool_oper: None,
-    int_oper: Some(|l, r| l - r),
-    float_oper: Some(|l, r| l - r),
-    ptr_oper: Some(|l, r| l - r),
-    string_oper: None,
-};
+bop!(BIN_OPER_SUB, -,
+    int_oper: op!(-),
+    float_oper: op!(-),
+    ptr_oper: op!(-),
+);
 
-pub static BIN_OPER_MUL: AoTypeBinOper = AoTypeBinOper {
-    name: "*",
-    bool_oper: Some(|l, r| l && r),
-    int_oper: Some(|l, r| l * r),
-    float_oper: Some(|l, r| l * r),
-    ptr_oper: Some(|l, r| l * r),
-    string_oper: None,
-};
+bop!(BIN_OPER_MUL, *,
+    bool_oper: op!(&&),
+    int_oper: op!(*),
+    float_oper: op!(*),
+    ptr_oper: op!(*),
+);
 
-pub static BIN_OPER_DIV: AoTypeBinOper = AoTypeBinOper {
-    name: "/",
-    bool_oper: None,
-    int_oper: Some(|l, r| l / r),
-    float_oper: Some(|l, r| l / r),
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_DIV, /,
+    int_oper: op!(/),
+    float_oper: op!(/),
+);
 
-pub static BIN_OPER_REM: AoTypeBinOper = AoTypeBinOper {
-    name: "%",
-    bool_oper: None,
-    int_oper: Some(|l, r| l % r),
-    float_oper: Some(|l, r| l % r),
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_REM, %,
+    int_oper: op!(%),
+    float_oper: op!(%),
+);
 
-pub static BIN_OPER_BAND: AoTypeBinOper = AoTypeBinOper {
-    name: "&",
-    bool_oper: None,
-    int_oper: Some(|l, r| l & r),
-    float_oper: None,
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_BAND, &,
+    int_oper: op!(&),
+);
 
-pub static BIN_OPER_BOR: AoTypeBinOper = AoTypeBinOper {
-    name: "|",
-    bool_oper: None,
-    int_oper: Some(|l, r| l | r),
-    float_oper: None,
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_BOR, |,
+    int_oper: op!(|),
+);
 
-pub static BIN_OPER_BXOR: AoTypeBinOper = AoTypeBinOper {
-    name: "^",
-    bool_oper: None,
-    int_oper: Some(|l, r| l ^ r),
-    float_oper: None,
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_BXOR, ^,
+    int_oper: op!(^),
+);
 
-pub static BIN_OPER_SHL: AoTypeBinOper = AoTypeBinOper {
-    name: "<<",
-    bool_oper: None,
-    int_oper: Some(|l, r| l << r),
-    float_oper: None,
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_SHL, <<,
+    int_oper: op!(<<),
+);
 
-pub static BIN_OPER_SHR: AoTypeBinOper = AoTypeBinOper {
-    name: ">>",
-    bool_oper: None,
-    int_oper: Some(|l, r| l >> r),
-    float_oper: None,
-    ptr_oper: None,
-    string_oper: None,
-};
+bop!(BIN_OPER_SHR, >>,
+    int_oper: op!(>>),
+);
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    macro_rules! test_op {
+        ( $op:ident, $t:ident, $lv:expr, $rv:expr, $res:expr ) => {
+            let left = AoType::$t($lv);
+            let right = AoType::$t($rv);
+            assert_eq!($op.apply(left, right), AoStatus::Return(AoType::$t($res)));
+        };
+    }
+
+    macro_rules! test_op_fail {
+        ( $op:ident, $t:ident, $lv:expr, $rv:expr, $msg:expr ) => {
+            let left = AoType::$t($lv);
+            let right = AoType::$t($rv);
+            assert_eq!(
+                $op.apply(left, right),
+                AoStatus::InvalidOperation($msg.to_string())
+            );
+        };
+    }
+
+    macro_rules! test_op_s {
+        ( $op:ident, $lv:expr, $rv:expr, $res:expr ) => {
+            test_op!(
+                $op,
+                AoString,
+                $lv.to_string(),
+                $rv.to_string(),
+                $res.to_string()
+            );
+        };
+    }
+
+    macro_rules! test_op_fail_s {
+        ( $op:ident, $lv:expr, $rv:expr, $msg:expr ) => {
+            test_op_fail!($op, AoString, $lv.to_string(), $rv.to_string(), $msg);
+        };
+    }
+
     #[test]
     fn test_add() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_ADD.apply(left, right),
-            AoStatus::Return(AoType::AoBool(true))
-        );
-
-        // AoInt
-        let left = AoType::AoInt(2);
-        let right = AoType::AoInt(2);
-        assert_eq!(
-            BIN_OPER_ADD.apply(left, right),
-            AoStatus::Return(AoType::AoInt(4))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(2.2);
-        let right = AoType::AoFloat(2.2);
-        assert_eq!(
-            BIN_OPER_ADD.apply(left, right),
-            AoStatus::Return(AoType::AoFloat(4.4))
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(2);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_ADD.apply(left, right),
-            AoStatus::Return(AoType::AoPtr(4))
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_ADD.apply(left, right),
-            AoStatus::Return(AoType::AoString("HelloWorld".to_string()))
-        );
+        test_op!(BIN_OPER_ADD, AoBool, true, false, true);
+        test_op!(BIN_OPER_ADD, AoInt, 2, 2, 4);
+        test_op!(BIN_OPER_ADD, AoFloat, 2.2, 2.2, 4.4);
+        test_op!(BIN_OPER_ADD, AoPtr, 2, 2, 4);
+        test_op_s!(BIN_OPER_ADD, "Hello", "World", "HelloWorld");
     }
 
     #[test]
     fn test_sub() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_SUB.apply(left, right),
-            AoStatus::InvalidOperation("true - false".to_string())
-        );
+        test_op!(BIN_OPER_SUB, AoInt, 3, 2, 1);
+        test_op!(BIN_OPER_SUB, AoFloat, 3.75, 2.25, 1.5);
+        test_op!(BIN_OPER_SUB, AoPtr, 3, 2, 1);
 
-        // AoInt
-        let left = AoType::AoInt(3);
-        let right = AoType::AoInt(2);
-        assert_eq!(
-            BIN_OPER_SUB.apply(left, right),
-            AoStatus::Return(AoType::AoInt(1))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.75);
-        let right = AoType::AoFloat(2.25);
-        assert_eq!(
-            BIN_OPER_SUB.apply(left, right),
-            AoStatus::Return(AoType::AoFloat(1.5))
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_SUB.apply(left, right),
-            AoStatus::Return(AoType::AoPtr(1))
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_SUB.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" - \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_SUB, AoBool, true, false, "true - false");
+        test_op_fail_s!(BIN_OPER_SUB, "Hello", "World", "\"Hello\" - \"World\"");
     }
 
     #[test]
     fn test_mul() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_MUL.apply(left, right),
-            AoStatus::Return(AoType::AoBool(false))
-        );
+        test_op!(BIN_OPER_MUL, AoBool, true, false, false);
+        test_op!(BIN_OPER_MUL, AoInt, 3, 3, 9);
+        test_op!(BIN_OPER_MUL, AoFloat, 3.5, 2.5, 8.75);
+        test_op!(BIN_OPER_MUL, AoPtr, 3, 3, 9);
 
-        // AoInt
-        let left = AoType::AoInt(3);
-        let right = AoType::AoInt(3);
-        assert_eq!(
-            BIN_OPER_MUL.apply(left, right),
-            AoStatus::Return(AoType::AoInt(9))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.5);
-        let right = AoType::AoFloat(2.5);
-        assert_eq!(
-            BIN_OPER_MUL.apply(left, right),
-            AoStatus::Return(AoType::AoFloat(8.75))
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(3);
-        assert_eq!(
-            BIN_OPER_MUL.apply(left, right),
-            AoStatus::Return(AoType::AoPtr(9))
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_MUL.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" * \"World\"".to_string())
-        );
+        test_op_fail_s!(BIN_OPER_MUL, "Hello", "World", "\"Hello\" * \"World\"");
     }
 
     #[test]
     fn test_div() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_DIV.apply(left, right),
-            AoStatus::InvalidOperation("true / false".to_string())
-        );
+        test_op!(BIN_OPER_DIV, AoInt, 3, 2, 1);
+        test_op!(BIN_OPER_DIV, AoFloat, 3.0, 2.0, 1.5);
 
-        // AoInt
-        let left = AoType::AoInt(3);
-        let right = AoType::AoInt(2);
-        assert_eq!(
-            BIN_OPER_DIV.apply(left, right),
-            AoStatus::Return(AoType::AoInt(1))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.0);
-        let right = AoType::AoFloat(2.0);
-        assert_eq!(
-            BIN_OPER_DIV.apply(left, right),
-            AoStatus::Return(AoType::AoFloat(1.5))
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(2);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_DIV.apply(left, right),
-            AoStatus::InvalidOperation("2p / 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_DIV.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" / \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_DIV, AoBool, true, false, "true / false");
+        test_op_fail!(BIN_OPER_DIV, AoPtr, 2, 2, "2p / 2p");
+        test_op_fail_s!(BIN_OPER_DIV, "Hello", "World", "\"Hello\" / \"World\"");
     }
 
     #[test]
     fn test_rem() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_REM.apply(left, right),
-            AoStatus::InvalidOperation("true % false".to_string())
-        );
+        test_op!(BIN_OPER_REM, AoInt, 5, 2, 1);
+        test_op!(BIN_OPER_REM, AoFloat, 5.5, 2.0, 1.5);
 
-        // AoInt
-        let left = AoType::AoInt(5);
-        let right = AoType::AoInt(2);
-        assert_eq!(
-            BIN_OPER_REM.apply(left, right),
-            AoStatus::Return(AoType::AoInt(1))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(5.5);
-        let right = AoType::AoFloat(2.0);
-        assert_eq!(
-            BIN_OPER_REM.apply(left, right),
-            AoStatus::Return(AoType::AoFloat(1.5))
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(5);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_REM.apply(left, right),
-            AoStatus::InvalidOperation("5p % 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_REM.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" % \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_REM, AoBool, true, false, "true % false");
+        test_op_fail!(BIN_OPER_REM, AoPtr, 5, 2, "5p % 2p");
+        test_op_fail_s!(BIN_OPER_REM, "Hello", "World", "\"Hello\" % \"World\"");
     }
 
     #[test]
     fn test_band() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_BAND.apply(left, right),
-            AoStatus::InvalidOperation("true & false".to_string())
-        );
+        test_op!(BIN_OPER_BAND, AoInt, 0b110, 0b100, 0b100);
 
-        // AoInt
-        let left = AoType::AoInt(4);
-        let right = AoType::AoInt(6);
-        assert_eq!(
-            BIN_OPER_BAND.apply(left, right),
-            AoStatus::Return(AoType::AoInt(4))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.3);
-        let right = AoType::AoFloat(2.2);
-        assert_eq!(
-            BIN_OPER_BAND.apply(left, right),
-            AoStatus::InvalidOperation("3.3f & 2.2f".to_string())
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_BAND.apply(left, right),
-            AoStatus::InvalidOperation("3p & 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_BAND.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" & \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_BAND, AoBool, true, false, "true & false");
+        test_op_fail!(BIN_OPER_BAND, AoFloat, 3.3, 2.2, "3.3f & 2.2f");
+        test_op_fail!(BIN_OPER_BAND, AoPtr, 3, 2, "3p & 2p");
+        test_op_fail_s!(BIN_OPER_BAND, "Hello", "World", "\"Hello\" & \"World\"");
     }
 
     #[test]
     fn test_bor() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_BOR.apply(left, right),
-            AoStatus::InvalidOperation("true | false".to_string())
-        );
+        test_op!(BIN_OPER_BOR, AoInt, 0b110, 0b100, 0b110);
 
-        // AoInt
-        let left = AoType::AoInt(4);
-        let right = AoType::AoInt(6);
-        assert_eq!(
-            BIN_OPER_BOR.apply(left, right),
-            AoStatus::Return(AoType::AoInt(6))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.3);
-        let right = AoType::AoFloat(2.2);
-        assert_eq!(
-            BIN_OPER_BOR.apply(left, right),
-            AoStatus::InvalidOperation("3.3f | 2.2f".to_string())
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_BOR.apply(left, right),
-            AoStatus::InvalidOperation("3p | 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_BOR.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" | \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_BOR, AoBool, true, false, "true | false");
+        test_op_fail!(BIN_OPER_BOR, AoFloat, 3.3, 2.2, "3.3f | 2.2f");
+        test_op_fail!(BIN_OPER_BOR, AoPtr, 3, 2, "3p | 2p");
+        test_op_fail_s!(BIN_OPER_BOR, "Hello", "World", "\"Hello\" | \"World\"");
     }
 
     #[test]
     fn test_bxor() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_BXOR.apply(left, right),
-            AoStatus::InvalidOperation("true ^ false".to_string())
-        );
+        test_op!(BIN_OPER_BXOR, AoInt, 0b110, 0b100, 0b010);
 
-        // AoInt
-        let left = AoType::AoInt(4);
-        let right = AoType::AoInt(6);
-        assert_eq!(
-            BIN_OPER_BXOR.apply(left, right),
-            AoStatus::Return(AoType::AoInt(2))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.3);
-        let right = AoType::AoFloat(2.2);
-        assert_eq!(
-            BIN_OPER_BXOR.apply(left, right),
-            AoStatus::InvalidOperation("3.3f ^ 2.2f".to_string())
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_BXOR.apply(left, right),
-            AoStatus::InvalidOperation("3p ^ 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_BXOR.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" ^ \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_BXOR, AoBool, true, false, "true ^ false");
+        test_op_fail!(BIN_OPER_BXOR, AoFloat, 3.3, 2.2, "3.3f ^ 2.2f");
+        test_op_fail!(BIN_OPER_BXOR, AoPtr, 3, 2, "3p ^ 2p");
+        test_op_fail_s!(BIN_OPER_BXOR, "Hello", "World", "\"Hello\" ^ \"World\"");
     }
 
     #[test]
     fn test_shl() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_SHL.apply(left, right),
-            AoStatus::InvalidOperation("true << false".to_string())
-        );
+        test_op!(BIN_OPER_SHL, AoInt, 0b010, 1, 0b100);
 
-        // AoInt
-        let left = AoType::AoInt(2);
-        let right = AoType::AoInt(1);
-        assert_eq!(
-            BIN_OPER_SHL.apply(left, right),
-            AoStatus::Return(AoType::AoInt(4))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.3);
-        let right = AoType::AoFloat(2.2);
-        assert_eq!(
-            BIN_OPER_SHL.apply(left, right),
-            AoStatus::InvalidOperation("3.3f << 2.2f".to_string())
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_SHL.apply(left, right),
-            AoStatus::InvalidOperation("3p << 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_SHL.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" << \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_SHL, AoBool, true, false, "true << false");
+        test_op_fail!(BIN_OPER_SHL, AoFloat, 3.3, 2.2, "3.3f << 2.2f");
+        test_op_fail!(BIN_OPER_SHL, AoPtr, 3, 2, "3p << 2p");
+        test_op_fail_s!(BIN_OPER_SHL, "Hello", "World", "\"Hello\" << \"World\"");
     }
 
     #[test]
     fn test_shr() {
-        // AoBool
-        let left = AoType::AoBool(true);
-        let right = AoType::AoBool(false);
-        assert_eq!(
-            BIN_OPER_SHR.apply(left, right),
-            AoStatus::InvalidOperation("true >> false".to_string())
-        );
+        test_op!(BIN_OPER_SHR, AoInt, 0b010, 1, 0b001);
 
-        // AoInt
-        let left = AoType::AoInt(2);
-        let right = AoType::AoInt(1);
-        assert_eq!(
-            BIN_OPER_SHR.apply(left, right),
-            AoStatus::Return(AoType::AoInt(1))
-        );
-
-        // AoFloat
-        let left = AoType::AoFloat(3.3);
-        let right = AoType::AoFloat(2.2);
-        assert_eq!(
-            BIN_OPER_SHR.apply(left, right),
-            AoStatus::InvalidOperation("3.3f >> 2.2f".to_string())
-        );
-
-        // AoPtr
-        let left = AoType::AoPtr(3);
-        let right = AoType::AoPtr(2);
-        assert_eq!(
-            BIN_OPER_SHR.apply(left, right),
-            AoStatus::InvalidOperation("3p >> 2p".to_string())
-        );
-
-        // AoString
-        let left = AoType::AoString("Hello".to_string());
-        let right = AoType::AoString("World".to_string());
-        assert_eq!(
-            BIN_OPER_SHR.apply(left, right),
-            AoStatus::InvalidOperation("\"Hello\" >> \"World\"".to_string())
-        );
+        test_op_fail!(BIN_OPER_SHR, AoBool, true, false, "true >> false");
+        test_op_fail!(BIN_OPER_SHR, AoFloat, 3.3, 2.2, "3.3f >> 2.2f");
+        test_op_fail!(BIN_OPER_SHR, AoPtr, 3, 2, "3p >> 2p");
+        test_op_fail_s!(BIN_OPER_SHR, "Hello", "World", "\"Hello\" >> \"World\"");
     }
 }
