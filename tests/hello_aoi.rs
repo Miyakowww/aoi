@@ -29,11 +29,11 @@ fn interrupt(id: u8, args: Vec<AoType>) -> Option<AoType> {
 #[test]
 fn hello_aoi() {
     let mut vm = AoVM::new(interrupt, 0);
-    let program = vec![
-        aoasm!(push dsb),
-        aoasm!(push "Hello Aoi!"),
-        aoasm!(cnf 1),
-        aoasm!(int 1),
+    let program = ao_program![
+        push dsb;
+        push "Hello Aoi!";
+        cnf 1;
+        int 1;
     ];
 
     // run

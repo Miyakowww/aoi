@@ -31,34 +31,34 @@ fn single_step() {
     let mut vm = AoVM::new(interrupt, 0);
 
     // calculate 1 + 2 + ... + 10
-    let program = vec![
+    let program = ao_program![
         //       a = 1
-        /*  0 */ aoasm!(push 1),
+        /*  0 */ push 1;
         //       b = 0
-        /*  1 */ aoasm!(push 0),
+        /*  1 */ push 0;
         //       while a <= 10 {
-        /*  2 */ aoasm!(arg 0),
-        /*  3 */ aoasm!(mov ca,ds),
-        /*  4 */ aoasm!(le 10),
-        /*  5 */ aoasm!(jf 15),
+        /*  2 */ arg 0;
+        /*  3 */ mov ca,ds;
+        /*  4 */ le 10;
+        /*  5 */ jf 15;
         //           b = a + b
-        /*  6 */ aoasm!(mov ca,ds),
-        /*  7 */ aoasm!(arg 1),
-        /*  8 */ aoasm!(add ds),
-        /*  9 */ aoasm!(mov ds,ca),
+        /*  6 */ mov ca,ds;
+        /*  7 */ arg 1;
+        /*  8 */ add ds;
+        /*  9 */ mov ds,ca;
         //           a = a + 1
-        /* 10 */ aoasm!(arg 0),
-        /* 11 */ aoasm!(mov ca,ds),
-        /* 12 */ aoasm!(inc),
-        /* 13 */ aoasm!(mov ds,ca),
+        /* 10 */ arg 0;
+        /* 11 */ mov ca,ds;
+        /* 12 */ inc;
+        /* 13 */ mov ds,ca;
         //       }
-        /* 14 */ aoasm!(jmp 2),
+        /* 14 */ jmp 2;
         //       println b
-        /* 15 */ aoasm!(push dsb),
-        /* 16 */ aoasm!(arg 1),
-        /* 17 */ aoasm!(push ds),
-        /* 18 */ aoasm!(cnf 1),
-        /* 19 */ aoasm!(int 2),
+        /* 15 */ push dsb;
+        /* 16 */ arg 1;
+        /* 17 */ push ds;
+        /* 18 */ cnf 1;
+        /* 19 */ int 2;
     ];
 
     // run

@@ -1,5 +1,6 @@
-use crate::runtime::opcode::{AoArg, AoOpCode};
+use crate::runtime::opcode::{opcodes, AoArg, AoOpcode, OpcodeArgType};
 use crate::runtime::types::AoType;
+use crate::AoProgram;
 
 /// Serializer for serializing and deserializing the Aoi assembly.
 pub enum AoAsmSerializer {}
@@ -65,234 +66,77 @@ impl AoAsmSerializer {
         result
     }
 
-    fn serialize_opcode(opcode: &AoOpCode) -> Vec<u8> {
-        let mut result = Vec::new();
-        match &opcode {
-            AoOpCode::NOP => {
-                result.push(0x00);
+    fn serialize_opcode(opcode: &dyn AoOpcode) -> Vec<u8> {
+        let mut result = vec![opcode.get_id()];
+        match opcode.get_args() {
+            OpcodeArgType::NoArg => (),
+            OpcodeArgType::u8(value) => {
+                result.extend_from_slice(value.to_le_bytes().as_ref());
             }
-
-            AoOpCode::CALL(addr) => {
-                result.push(0x10);
-                result.extend_from_slice(&addr.to_le_bytes());
+            OpcodeArgType::u32(value) => {
+                result.extend_from_slice(value.to_le_bytes().as_ref());
             }
-            AoOpCode::RET => {
-                result.push(0x11);
+            OpcodeArgType::bool(value) => {
+                result.push(if value { 0x01 } else { 0x00 });
             }
-            AoOpCode::JMP(addr) => {
-                result.push(0x12);
-                result.extend_from_slice(&addr.to_le_bytes());
+            OpcodeArgType::AoArg(value) => {
+                result.extend_from_slice(&AoAsmSerializer::serialize_arg(&value));
             }
-            AoOpCode::JT(addr) => {
-                result.push(0x13);
-                result.extend_from_slice(&addr.to_le_bytes());
-            }
-            AoOpCode::JF(addr) => {
-                result.push(0x14);
-                result.extend_from_slice(&addr.to_le_bytes());
-            }
-
-            AoOpCode::MOV(dst, src) => {
-                result.push(0x20);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(dst));
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::INT(id) => {
-                result.push(0x21);
-                result.extend_from_slice(&id.to_le_bytes());
-            }
-
-            AoOpCode::PUSH(src) => {
-                result.push(0x30);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::POP(save) => {
-                result.push(0x31);
-                result.push(if *save { 0x01 } else { 0x00 });
-            }
-
-            AoOpCode::ADD(src) => {
-                result.push(0x40);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::SUB(src) => {
-                result.push(0x41);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::MUL(src) => {
-                result.push(0x42);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::DIV(src) => {
-                result.push(0x43);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::REM(src) => {
-                result.push(0x44);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::INC => {
-                result.push(0x45);
-            }
-            AoOpCode::DEC => {
-                result.push(0x46);
-            }
-
-            AoOpCode::AND(src) => {
-                result.push(0x50);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::OR(src) => {
-                result.push(0x51);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::XOR(src) => {
-                result.push(0x52);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::NOT => {
-                result.push(0x53);
-            }
-
-            AoOpCode::BAND(src) => {
-                result.push(0x60);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::BOR(src) => {
-                result.push(0x61);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::BXOR(src) => {
-                result.push(0x62);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::BNOT => {
-                result.push(0x63);
-            }
-
-            AoOpCode::SHL(src) => {
-                result.push(0x70);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::SHR(src) => {
-                result.push(0x71);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-
-            AoOpCode::EQU(src) => {
-                result.push(0x80);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::NEQ(src) => {
-                result.push(0x81);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::GT(src) => {
-                result.push(0x82);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::LT(src) => {
-                result.push(0x83);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::GE(src) => {
-                result.push(0x84);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-            AoOpCode::LE(src) => {
-                result.push(0x85);
-                result.extend_from_slice(&AoAsmSerializer::serialize_arg(src));
-            }
-
-            AoOpCode::CSI => {
-                result.push(0x90);
-            }
-            AoOpCode::CSF => {
-                result.push(0x91);
-            }
-            AoOpCode::CSP => {
-                result.push(0x92);
-            }
-            AoOpCode::CSS => {
-                result.push(0x93);
-            }
-
-            AoOpCode::ISB => {
-                result.push(0xA0);
-            }
-            AoOpCode::ISI => {
-                result.push(0xA1);
-            }
-            AoOpCode::ISF => {
-                result.push(0xA2);
-            }
-            AoOpCode::ISP => {
-                result.push(0xA3);
-            }
-            AoOpCode::ISS => {
-                result.push(0xA4);
-            }
-
-            AoOpCode::ARG(offset) => {
-                result.push(0xB0);
-                result.extend_from_slice(&offset.to_le_bytes());
-            }
-            AoOpCode::CNF(argc) => {
-                result.push(0xB1);
-                result.extend_from_slice(&argc.to_le_bytes());
+            OpcodeArgType::AoArg2(value1, value2) => {
+                result.extend_from_slice(&AoAsmSerializer::serialize_arg(&value1));
+                result.extend_from_slice(&AoAsmSerializer::serialize_arg(&value2));
             }
         }
         result
     }
 
-    pub fn serialize(asm: &[AoOpCode]) -> Vec<u8> {
+    pub fn serialize(asm: &[Box<dyn AoOpcode>]) -> Vec<u8> {
         let mut result = Vec::new();
         for opcode in asm {
-            result.extend_from_slice(&AoAsmSerializer::serialize_opcode(opcode));
+            result.extend_from_slice(&AoAsmSerializer::serialize_opcode(opcode.as_ref()));
         }
         result
     }
 
-    fn deserialize_type(value: &[u8], offset: &mut usize) -> Option<AoType> {
-        match value[*offset] {
+    fn deserialize_type(bin: &[u8], offset: &mut usize) -> Option<AoType> {
+        match bin[*offset] {
             0x01 => {
                 *offset += 2;
-                Some(AoType::AoBool(value[*offset - 1] != 0x00))
+                Some(AoType::AoBool(bin[*offset - 1] != 0x00))
             }
             0x02 => {
                 *offset += 5;
                 Some(AoType::AoInt(i32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
+                    bin[*offset - 4..*offset].try_into().unwrap(),
                 )))
             }
             0x03 => {
                 *offset += 5;
                 Some(AoType::AoFloat(f32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
+                    bin[*offset - 4..*offset].try_into().unwrap(),
                 )))
             }
             0x04 => {
                 *offset += 5;
                 Some(AoType::AoPtr(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
+                    bin[*offset - 4..*offset].try_into().unwrap(),
                 )))
             }
             0x05 => {
                 let str_len =
-                    u32::from_le_bytes(value[*offset + 1..*offset + 5].try_into().unwrap())
-                        as usize;
+                    u32::from_le_bytes(bin[*offset + 1..*offset + 5].try_into().unwrap()) as usize;
                 *offset += 5 + str_len;
                 Some(AoType::AoString(
-                    String::from_utf8(value[*offset - str_len..*offset].to_vec()).unwrap(),
+                    String::from_utf8(bin[*offset - str_len..*offset].to_vec()).unwrap(),
                 ))
             }
             _ => None,
         }
     }
 
-    fn deserialize_arg(value: &[u8], offset: &mut usize) -> Option<AoArg> {
+    fn deserialize_arg(bin: &[u8], offset: &mut usize) -> Option<AoArg> {
         *offset += 1;
-        match value[*offset - 1] {
+        match bin[*offset - 1] {
             0x01 => Some(AoArg::DSB),
             0x02 => Some(AoArg::DST),
             0x03 => Some(AoArg::PC),
@@ -301,176 +145,49 @@ impl AoAsmSerializer {
             0x06 => Some(AoArg::DS),
             0x07 => Some(AoArg::GVS),
             0x08 => Some(AoArg::Imm(
-                AoAsmSerializer::deserialize_type(value, offset).unwrap(),
+                AoAsmSerializer::deserialize_type(bin, offset).unwrap(),
             )),
             _ => None,
         }
     }
 
-    fn deserialize_opcode(value: &[u8], offset: &mut usize) -> Option<AoOpCode> {
+    fn deserialize_opcode(bin: &[u8], offset: &mut usize) -> Option<Box<dyn AoOpcode>> {
         *offset += 1;
-        match value[*offset - 1] {
-            0x00 => Some(AoOpCode::NOP),
+        let opcode = opcodes::create_opcode_by_id(bin[*offset - 1]);
+        opcode.as_ref()?;
+        let mut opcode = opcode.unwrap();
 
-            0x10 => {
-                *offset += 4;
-                Some(AoOpCode::CALL(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
-                )))
-            }
-            0x11 => Some(AoOpCode::RET),
-            0x12 => {
-                *offset += 4;
-                Some(AoOpCode::JMP(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
-                )))
-            }
-            0x13 => {
-                *offset += 4;
-                Some(AoOpCode::JT(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
-                )))
-            }
-            0x14 => {
-                *offset += 4;
-                Some(AoOpCode::JF(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
-                )))
-            }
-
-            0x20 => {
-                let dst = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::MOV(dst, src))
-            }
-            0x21 => {
+        match opcode.get_args() {
+            OpcodeArgType::NoArg => (),
+            OpcodeArgType::u8(_) => {
                 *offset += 1;
-                Some(AoOpCode::INT(value[*offset - 1]))
+                opcode.set_args(OpcodeArgType::u8(bin[*offset - 1]));
             }
-
-            0x30 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::PUSH(src))
+            OpcodeArgType::u32(_) => {
+                *offset += 4;
+                opcode.set_args(OpcodeArgType::u32(u32::from_le_bytes(
+                    bin[*offset - 4..*offset].try_into().unwrap(),
+                )));
             }
-            0x31 => {
+            OpcodeArgType::bool(_) => {
                 *offset += 1;
-                Some(AoOpCode::POP(value[*offset - 1] != 0x00))
+                opcode.set_args(OpcodeArgType::bool(bin[*offset - 1] != 0x00));
             }
-
-            0x40 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::ADD(src))
+            OpcodeArgType::AoArg(_) => {
+                let value = AoAsmSerializer::deserialize_arg(bin, offset).unwrap();
+                opcode.set_args(OpcodeArgType::AoArg(value));
             }
-            0x41 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::SUB(src))
+            OpcodeArgType::AoArg2(_, _) => {
+                let value1 = AoAsmSerializer::deserialize_arg(bin, offset).unwrap();
+                let value2 = AoAsmSerializer::deserialize_arg(bin, offset).unwrap();
+                opcode.set_args(OpcodeArgType::AoArg2(value1, value2));
             }
-            0x42 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::MUL(src))
-            }
-            0x43 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::DIV(src))
-            }
-            0x44 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::REM(src))
-            }
-            0x45 => Some(AoOpCode::INC),
-            0x46 => Some(AoOpCode::DEC),
-
-            0x50 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::AND(src))
-            }
-            0x51 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::OR(src))
-            }
-            0x52 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::XOR(src))
-            }
-            0x53 => Some(AoOpCode::NOT),
-
-            0x60 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::BAND(src))
-            }
-            0x61 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::BOR(src))
-            }
-            0x62 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::BXOR(src))
-            }
-            0x63 => Some(AoOpCode::BNOT),
-
-            0x70 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::SHL(src))
-            }
-            0x71 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::SHR(src))
-            }
-
-            0x80 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::EQU(src))
-            }
-            0x81 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::NEQ(src))
-            }
-            0x82 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::GT(src))
-            }
-            0x83 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::LT(src))
-            }
-            0x84 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::GE(src))
-            }
-            0x85 => {
-                let src = AoAsmSerializer::deserialize_arg(value, offset).unwrap();
-                Some(AoOpCode::LE(src))
-            }
-
-            0x90 => Some(AoOpCode::CSI),
-            0x91 => Some(AoOpCode::CSF),
-            0x92 => Some(AoOpCode::CSP),
-            0x93 => Some(AoOpCode::CSS),
-
-            0xA0 => Some(AoOpCode::ISB),
-            0xA1 => Some(AoOpCode::ISI),
-            0xA2 => Some(AoOpCode::ISF),
-            0xA3 => Some(AoOpCode::ISP),
-            0xA4 => Some(AoOpCode::ISS),
-
-            0xB0 => {
-                *offset += 4;
-                Some(AoOpCode::ARG(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
-                )))
-            }
-            0xB1 => {
-                *offset += 4;
-                Some(AoOpCode::CNF(u32::from_le_bytes(
-                    value[*offset - 4..*offset].try_into().unwrap(),
-                )))
-            }
-
-            _ => None,
         }
+
+        Some(opcode)
     }
 
-    pub fn deserialize(value: &[u8]) -> Option<Vec<AoOpCode>> {
+    pub fn deserialize(value: &[u8]) -> Option<AoProgram> {
         let mut result = Vec::new();
         let mut offset = 0;
         while offset < value.len() {
