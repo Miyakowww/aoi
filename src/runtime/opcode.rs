@@ -148,6 +148,33 @@ impl Display for AoArg {
     }
 }
 
+#[allow(non_camel_case_types)]
+pub enum AoArgLowerCase {
+    dsb,
+    dst,
+    pc,
+    dp,
+    ca,
+    ds,
+    gvs,
+    imm(AoType),
+}
+
+impl AoArgLowerCase {
+    pub fn to_aoarg(&self) -> AoArg {
+        match self {
+            AoArgLowerCase::dsb => AoArg::DSB,
+            AoArgLowerCase::dst => AoArg::DST,
+            AoArgLowerCase::pc => AoArg::PC,
+            AoArgLowerCase::dp => AoArg::DP,
+            AoArgLowerCase::ca => AoArg::CA,
+            AoArgLowerCase::ds => AoArg::DS,
+            AoArgLowerCase::gvs => AoArg::GVS,
+            AoArgLowerCase::imm(v) => AoArg::Imm(v.clone()),
+        }
+    }
+}
+
 /// Aoi opcode.
 pub enum AoOpCode {
     /// No operation.
@@ -759,4 +786,220 @@ impl Display for AoOpCode {
             AoOpCode::CNF(argc) => write!(f, "cnf {}", argc),
         }
     }
+}
+
+#[macro_export]
+macro_rules! aoasm {
+    ( nop ) => {
+        AoOpCode::NOP
+    };
+
+    ( call $addr:expr ) => {
+        AoOpCode::CALL($addr as u32)
+    };
+    ( ret ) => {
+        AoOpCode::RET
+    };
+    ( jmp $addr:expr ) => {
+        AoOpCode::JMP($addr as u32)
+    };
+    ( jt $addr:expr ) => {
+        AoOpCode::JT($addr as u32)
+    };
+    ( jf $addr:expr ) => {
+        AoOpCode::JF($addr as u32)
+    };
+
+    ( mov $dst:ident,$src:ident ) => {
+        AoOpCode::MOV(
+            AoArgLowerCase::$dst.to_aoarg(),
+            AoArgLowerCase::$src.to_aoarg(),
+        )
+    };
+    ( mov $dst:ident,$val:expr) => {
+        AoOpCode::MOV(AoArgLowerCase::$dst.to_aoarg(), AoArg::from($val))
+    };
+    ( int $id:expr ) => {
+        AoOpCode::INT($id as u8)
+    };
+
+    ( push $src:ident ) => {
+        AoOpCode::PUSH(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( push $val:expr ) => {
+        AoOpCode::PUSH(AoArg::from($val))
+    };
+    ( pop ) => {
+        AoOpCode::POP(false)
+    };
+    ( pop ca ) => {
+        AoOpCode::POP(true)
+    };
+
+    ( add $src:ident ) => {
+        AoOpCode::ADD(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( add $val:expr ) => {
+        AoOpCode::ADD(AoArg::from($val))
+    };
+    ( sub $src:ident ) => {
+        AoOpCode::SUB(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( sub $val:expr ) => {
+        AoOpCode::SUB(AoArg::from($val))
+    };
+    ( mul $src:ident ) => {
+        AoOpCode::MUL(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( mul $val:expr ) => {
+        AoOpCode::MUL(AoArg::from($val))
+    };
+    ( div $src:ident ) => {
+        AoOpCode::DIV(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( div $val:expr ) => {
+        AoOpCode::DIV(AoArg::from($val))
+    };
+    ( rem $src:ident ) => {
+        AoOpCode::REM(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( rem $val:expr ) => {
+        AoOpCode::REM(AoArg::from($val))
+    };
+    ( inc ) => {
+        AoOpCode::INC
+    };
+    ( dec ) => {
+        AoOpCode::DEC
+    };
+
+    ( and $src:ident ) => {
+        AoOpCode::AND(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( and $val:expr ) => {
+        AoOpCode::AND(AoArg::from($val))
+    };
+    ( or $src:ident ) => {
+        AoOpCode::OR(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( or $val:expr ) => {
+        AoOpCode::OR(AoArg::from($val))
+    };
+    ( xor $src:ident ) => {
+        AoOpCode::XOR(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( xor $val:expr ) => {
+        AoOpCode::XOR(AoArg::from($val))
+    };
+    ( not ) => {
+        AoOpCode::NOT
+    };
+
+    ( band $src:ident ) => {
+        AoOpCode::BAND(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( band $val:expr ) => {
+        AoOpCode::BAND(AoArg::from($val))
+    };
+    ( bor $src:ident ) => {
+        AoOpCode::BOR(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( bor $val:expr ) => {
+        AoOpCode::BOR(AoArg::from($val))
+    };
+    ( bxor $src:ident ) => {
+        AoOpCode::BXOR(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( bxor $val:expr ) => {
+        AoOpCode::BXOR(AoArg::from($val))
+    };
+    ( bnot ) => {
+        AoOpCode::BNOT
+    };
+
+    ( shl $src:ident ) => {
+        AoOpCode::SHL(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( shl $val:expr ) => {
+        AoOpCode::SHL(AoArg::from($val))
+    };
+    ( shr $src:ident ) => {
+        AoOpCode::SHR(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( shr $val:expr ) => {
+        AoOpCode::SHR(AoArg::from($val))
+    };
+
+    ( equ $src:ident ) => {
+        AoOpCode::EQU(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( equ $val:expr ) => {
+        AoOpCode::EQU(AoArg::from($val))
+    };
+    ( neq $src:ident ) => {
+        AoOpCode::NEQ(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( neq $val:expr ) => {
+        AoOpCode::NEQ(AoArg::from($val))
+    };
+    ( gt $src:ident ) => {
+        AoOpCode::GT(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( gt $val:expr ) => {
+        AoOpCode::GT(AoArg::from($val))
+    };
+    ( lt $src:ident ) => {
+        AoOpCode::LT(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( lt $val:expr ) => {
+        AoOpCode::LT(AoArg::from($val))
+    };
+    ( ge $src:ident ) => {
+        AoOpCode::GE(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( ge $val:expr ) => {
+        AoOpCode::GE(AoArg::from($val))
+    };
+    ( le $src:ident ) => {
+        AoOpCode::LE(AoArgLowerCase::$src.to_aoarg())
+    };
+    ( le $val:expr ) => {
+        AoOpCode::LE(AoArg::from($val))
+    };
+
+    ( csi ) => {
+        AoOpCode::CSI
+    };
+    ( csf ) => {
+        AoOpCode::CSF
+    };
+    ( csp ) => {
+        AoOpCode::CSP
+    };
+    ( css ) => {
+        AoOpCode::CSS
+    };
+
+    ( isb ) => {
+        AoOpCode::ISB
+    };
+    ( isi ) => {
+        AoOpCode::ISI
+    };
+    ( isf ) => {
+        AoOpCode::ISF
+    };
+    ( isp ) => {
+        AoOpCode::ISP
+    };
+    ( iss ) => {
+        AoOpCode::ISS
+    };
+
+    ( arg $offset:expr ) => {
+        AoOpCode::ARG($offset as u32)
+    };
+    ( cnf $argc:expr ) => {
+        AoOpCode::CNF($argc as u32)
+    };
 }

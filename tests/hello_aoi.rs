@@ -30,10 +30,10 @@ fn interrupt(id: u8, args: Vec<AoType>) -> Option<AoType> {
 fn hello_aoi() {
     let mut vm = AoVM::new(interrupt, 0);
     let program = vec![
-        AoOpCode::PUSH(AoArg::DSB),                // push dsb
-        AoOpCode::PUSH(AoArg::from("Hello Aoi!")), // push "Hello Aoi!"
-        AoOpCode::CNF(1),                          // cnf 1
-        AoOpCode::INT(1),                          // int 1
+        aoasm!(push dsb),
+        aoasm!(push "Hello Aoi!"),
+        aoasm!(cnf 1),
+        aoasm!(int 1),
     ];
 
     // run
