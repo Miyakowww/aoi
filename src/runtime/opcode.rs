@@ -110,6 +110,13 @@ impl AoArg {
 }
 
 macro_rules! impl_from {
+    ( $at:ident, &str ) => {
+        impl From<&str> for AoArg {
+            fn from(t: &str) -> AoArg {
+                AoArg::Imm(AoType::$at(t.to_string()))
+            }
+        }
+    };
     ( $at:ident, $rt:ty ) => {
         impl From<$rt> for AoArg {
             fn from(t: $rt) -> AoArg {
@@ -124,12 +131,7 @@ impl_from!(AoInt, i32);
 impl_from!(AoFloat, f32);
 impl_from!(AoPtr, u32);
 impl_from!(AoString, String);
-
-impl From<&str> for AoArg {
-    fn from(t: &str) -> AoArg {
-        AoArg::Imm(AoType::AoString(t.to_string()))
-    }
-}
+impl_from!(AoString, &str);
 
 impl Display for AoArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

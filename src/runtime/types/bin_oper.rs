@@ -149,6 +149,15 @@ mod tests {
     use super::*;
 
     macro_rules! test_op {
+        ( $op:ident, $lv:expr, $rv:expr, $res:expr ) => {
+            test_op!(
+                $op,
+                AoString,
+                $lv.to_string(),
+                $rv.to_string(),
+                $res.to_string()
+            );
+        };
         ( $op:ident, $t:ident, $lv:expr, $rv:expr, $res:expr ) => {
             let left = AoType::$t($lv);
             let right = AoType::$t($rv);
@@ -157,6 +166,9 @@ mod tests {
     }
 
     macro_rules! test_op_fail {
+        ( $op:ident, $lv:expr, $rv:expr, $msg:expr ) => {
+            test_op_fail!($op, AoString, $lv.to_string(), $rv.to_string(), $msg);
+        };
         ( $op:ident, $t:ident, $lv:expr, $rv:expr, $msg:expr ) => {
             let left = AoType::$t($lv);
             let right = AoType::$t($rv);
@@ -167,31 +179,13 @@ mod tests {
         };
     }
 
-    macro_rules! test_op_s {
-        ( $op:ident, $lv:expr, $rv:expr, $res:expr ) => {
-            test_op!(
-                $op,
-                AoString,
-                $lv.to_string(),
-                $rv.to_string(),
-                $res.to_string()
-            );
-        };
-    }
-
-    macro_rules! test_op_fail_s {
-        ( $op:ident, $lv:expr, $rv:expr, $msg:expr ) => {
-            test_op_fail!($op, AoString, $lv.to_string(), $rv.to_string(), $msg);
-        };
-    }
-
     #[test]
     fn test_add() {
         test_op!(BIN_OPER_ADD, AoBool, true, false, true);
         test_op!(BIN_OPER_ADD, AoInt, 2, 2, 4);
         test_op!(BIN_OPER_ADD, AoFloat, 2.2, 2.2, 4.4);
         test_op!(BIN_OPER_ADD, AoPtr, 2, 2, 4);
-        test_op_s!(BIN_OPER_ADD, "Hello", "World", "HelloWorld");
+        test_op!(BIN_OPER_ADD, "Hello", "World", "HelloWorld");
     }
 
     #[test]
@@ -201,7 +195,7 @@ mod tests {
         test_op!(BIN_OPER_SUB, AoPtr, 3, 2, 1);
 
         test_op_fail!(BIN_OPER_SUB, AoBool, true, false, "true - false");
-        test_op_fail_s!(BIN_OPER_SUB, "Hello", "World", "\"Hello\" - \"World\"");
+        test_op_fail!(BIN_OPER_SUB, "Hello", "World", "\"Hello\" - \"World\"");
     }
 
     #[test]
@@ -211,7 +205,7 @@ mod tests {
         test_op!(BIN_OPER_MUL, AoFloat, 3.5, 2.5, 8.75);
         test_op!(BIN_OPER_MUL, AoPtr, 3, 3, 9);
 
-        test_op_fail_s!(BIN_OPER_MUL, "Hello", "World", "\"Hello\" * \"World\"");
+        test_op_fail!(BIN_OPER_MUL, "Hello", "World", "\"Hello\" * \"World\"");
     }
 
     #[test]
@@ -221,7 +215,7 @@ mod tests {
 
         test_op_fail!(BIN_OPER_DIV, AoBool, true, false, "true / false");
         test_op_fail!(BIN_OPER_DIV, AoPtr, 2, 2, "2p / 2p");
-        test_op_fail_s!(BIN_OPER_DIV, "Hello", "World", "\"Hello\" / \"World\"");
+        test_op_fail!(BIN_OPER_DIV, "Hello", "World", "\"Hello\" / \"World\"");
     }
 
     #[test]
@@ -231,7 +225,7 @@ mod tests {
 
         test_op_fail!(BIN_OPER_REM, AoBool, true, false, "true % false");
         test_op_fail!(BIN_OPER_REM, AoPtr, 5, 2, "5p % 2p");
-        test_op_fail_s!(BIN_OPER_REM, "Hello", "World", "\"Hello\" % \"World\"");
+        test_op_fail!(BIN_OPER_REM, "Hello", "World", "\"Hello\" % \"World\"");
     }
 
     #[test]
@@ -241,7 +235,7 @@ mod tests {
         test_op_fail!(BIN_OPER_BAND, AoBool, true, false, "true & false");
         test_op_fail!(BIN_OPER_BAND, AoFloat, 3.3, 2.2, "3.3f & 2.2f");
         test_op_fail!(BIN_OPER_BAND, AoPtr, 3, 2, "3p & 2p");
-        test_op_fail_s!(BIN_OPER_BAND, "Hello", "World", "\"Hello\" & \"World\"");
+        test_op_fail!(BIN_OPER_BAND, "Hello", "World", "\"Hello\" & \"World\"");
     }
 
     #[test]
@@ -251,7 +245,7 @@ mod tests {
         test_op_fail!(BIN_OPER_BOR, AoBool, true, false, "true | false");
         test_op_fail!(BIN_OPER_BOR, AoFloat, 3.3, 2.2, "3.3f | 2.2f");
         test_op_fail!(BIN_OPER_BOR, AoPtr, 3, 2, "3p | 2p");
-        test_op_fail_s!(BIN_OPER_BOR, "Hello", "World", "\"Hello\" | \"World\"");
+        test_op_fail!(BIN_OPER_BOR, "Hello", "World", "\"Hello\" | \"World\"");
     }
 
     #[test]
@@ -261,7 +255,7 @@ mod tests {
         test_op_fail!(BIN_OPER_BXOR, AoBool, true, false, "true ^ false");
         test_op_fail!(BIN_OPER_BXOR, AoFloat, 3.3, 2.2, "3.3f ^ 2.2f");
         test_op_fail!(BIN_OPER_BXOR, AoPtr, 3, 2, "3p ^ 2p");
-        test_op_fail_s!(BIN_OPER_BXOR, "Hello", "World", "\"Hello\" ^ \"World\"");
+        test_op_fail!(BIN_OPER_BXOR, "Hello", "World", "\"Hello\" ^ \"World\"");
     }
 
     #[test]
@@ -271,7 +265,7 @@ mod tests {
         test_op_fail!(BIN_OPER_SHL, AoBool, true, false, "true << false");
         test_op_fail!(BIN_OPER_SHL, AoFloat, 3.3, 2.2, "3.3f << 2.2f");
         test_op_fail!(BIN_OPER_SHL, AoPtr, 3, 2, "3p << 2p");
-        test_op_fail_s!(BIN_OPER_SHL, "Hello", "World", "\"Hello\" << \"World\"");
+        test_op_fail!(BIN_OPER_SHL, "Hello", "World", "\"Hello\" << \"World\"");
     }
 
     #[test]
@@ -281,6 +275,6 @@ mod tests {
         test_op_fail!(BIN_OPER_SHR, AoBool, true, false, "true >> false");
         test_op_fail!(BIN_OPER_SHR, AoFloat, 3.3, 2.2, "3.3f >> 2.2f");
         test_op_fail!(BIN_OPER_SHR, AoPtr, 3, 2, "3p >> 2p");
-        test_op_fail_s!(BIN_OPER_SHR, "Hello", "World", "\"Hello\" >> \"World\"");
+        test_op_fail!(BIN_OPER_SHR, "Hello", "World", "\"Hello\" >> \"World\"");
     }
 }

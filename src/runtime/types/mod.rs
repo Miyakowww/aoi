@@ -72,6 +72,13 @@ impl_oper!(Shl, shl, BIN_OPER_SHL);
 impl_oper!(Shr, shr, BIN_OPER_SHR);
 
 macro_rules! impl_from {
+    ( $at:ident, &str ) => {
+        impl From<&str> for AoType {
+            fn from(t: &str) -> AoType {
+                AoType::$at(t.to_string())
+            }
+        }
+    };
     ( $at:ident, $rt:ty ) => {
         impl From<$rt> for AoType {
             fn from(t: $rt) -> AoType {
@@ -86,9 +93,4 @@ impl_from!(AoInt, i32);
 impl_from!(AoFloat, f32);
 impl_from!(AoPtr, u32);
 impl_from!(AoString, String);
-
-impl From<&str> for AoType {
-    fn from(t: &str) -> AoType {
-        AoType::AoString(t.to_string())
-    }
-}
+impl_from!(AoString, &str);
