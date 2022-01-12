@@ -78,7 +78,7 @@ impl AoVM {
     /// use aoi::runtime::vm::AoVM;
     /// use aoi::runtime::types::AoType;
     ///
-    /// let mut vm = AoVM::new(|_, _| None, 0);
+    /// let mut vm = AoVM::default();
     /// vm.push(AoType::AoInt(1));
     /// assert_eq!(vm.ds.len(), 1);
     /// assert_eq!(vm.ds[0], AoType::AoInt(1));
@@ -99,7 +99,7 @@ impl AoVM {
     /// use aoi::runtime::vm::AoVM;
     /// use aoi::runtime::types::AoType;
     ///
-    /// let mut vm = AoVM::new(|_, _| None, 0);
+    /// let mut vm = AoVM::default();
     /// vm.push(AoType::AoInt(1));
     /// vm.push(AoType::AoInt(2));
     ///
@@ -118,7 +118,7 @@ impl AoVM {
     /// use aoi::runtime::vm::AoVM;
     /// use aoi::runtime::types::AoType;
     ///
-    /// let mut vm = AoVM::new(|_, _| None, 0);
+    /// let mut vm = AoVM::default();
     /// vm.push(AoType::AoInt(1));
     /// vm.push(AoType::AoInt(2));
     ///

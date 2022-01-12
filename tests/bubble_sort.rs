@@ -1,3 +1,4 @@
+#![recursion_limit = "107"]
 use aoi::*;
 
 #[test]

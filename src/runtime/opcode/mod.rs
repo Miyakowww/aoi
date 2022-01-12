@@ -39,8 +39,8 @@ impl AoArg {
     /// use aoi::runtime::types::AoType;
     /// use aoi::runtime::vm::AoVM;
     ///
-    /// let vm = AoVM::new(|_, _| None, 0);
-    /// assert_eq!(AoArg::CA.get_value(&vm), AoType::default());
+    /// let mut vm = AoVM::default();
+    /// assert_eq!(AoArg::CA.get_value(&mut vm), AoType::default());
     /// ```
     pub fn get_value(&self, vm: &mut AoVM) -> AoType {
         match self {
@@ -64,7 +64,7 @@ impl AoArg {
     /// use aoi::runtime::types::AoType;
     /// use aoi::runtime::vm::AoVM;
     ///
-    /// let mut vm = AoVM::new(|_, _| None, 0);
+    /// let mut vm = AoVM::default();
     /// AoArg::CA.set_value(&mut vm, AoType::AoPtr(0x12345678));
     /// assert_eq!(vm.ca, AoType::AoPtr(0x12345678));
     /// ```

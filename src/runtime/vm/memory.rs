@@ -92,6 +92,7 @@ impl Section {
     }
 }
 
+#[derive(Default)]
 pub struct Memory {
     sections: Vec<Option<Box<Section>>>,
 }
