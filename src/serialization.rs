@@ -43,6 +43,9 @@ impl AoAsmSerializer {
             AoArg::DP => {
                 result.push(0x02);
             }
+            AoArg::MP => {
+                result.push(0x03);
+            }
             AoArg::DSB => {
                 result.push(0x11);
             }
@@ -54,6 +57,9 @@ impl AoAsmSerializer {
             }
             AoArg::DS => {
                 result.push(0xE1);
+            }
+            AoArg::MEM => {
+                result.push(0xE2);
             }
             AoArg::Imm(value) => {
                 result.push(0xFF);
@@ -136,10 +142,12 @@ impl AoAsmSerializer {
         match bin[*offset - 1] {
             0x01 => Some(AoArg::PC),
             0x02 => Some(AoArg::DP),
+            0x03 => Some(AoArg::MP),
             0x11 => Some(AoArg::DSB),
             0x12 => Some(AoArg::DST),
             0x21 => Some(AoArg::CA),
             0xE1 => Some(AoArg::DS),
+            0xE2 => Some(AoArg::MEM),
             0xFF => Some(AoArg::Imm(
                 AoAsmSerializer::deserialize_type(bin, offset).unwrap(),
             )),

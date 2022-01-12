@@ -176,7 +176,8 @@ opcode!(Jf, 0x14, "jf {}", u32 addr, (&self, vm) {
 });
 
 opcode!(Mov, 0x20, "mov {},{}", dst, src, (&self, vm) {
-    match self.dst.set_value(vm, self.src.get_value(vm)) {
+    let val = self.src.get_value(vm);
+    match self.dst.set_value(vm, val) {
         AoStatus::Ok => (),
         err => return err,
     }
@@ -206,7 +207,8 @@ opcode!(Int, 0x21, "int {}", u8 id, (&self, vm) {
 });
 
 opcode!(Push, 0x22, "push {}", src, (&self, vm) {
-    if !vm.push(self.src.get_value(vm)) {
+    let val = self.src.get_value(vm);
+    if !vm.push(val) {
         return AoStatus::DataStackOverflow;
     }
 });

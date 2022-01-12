@@ -4,19 +4,19 @@ macro_rules! ao_asm {
         Box::new(opcodes::Nop)
     };
 
-    ( call $addr:expr ) => {
+    ( call $addr:tt ) => {
         Box::new(opcodes::Call { addr: $addr })
     };
     ( ret ) => {
         Box::new(opcodes::Ret)
     };
-    ( jmp $addr:expr ) => {
+    ( jmp $addr:tt ) => {
         Box::new(opcodes::Jmp { addr: $addr })
     };
-    ( jt $addr:expr ) => {
+    ( jt $addr:tt ) => {
         Box::new(opcodes::Jt { addr: $addr })
     };
-    ( jf $addr:expr ) => {
+    ( jf $addr:tt ) => {
         Box::new(opcodes::Jf { addr: $addr })
     };
 
@@ -26,13 +26,25 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( mov $dst:ident,$val:expr) => {
+    ( mov dp,$val:tt ) => {
+        Box::new(opcodes::Mov {
+            dst: AoArg::DP,
+            src: AoArg::from($val as u32),
+        })
+    };
+    ( mov mp,$val:tt ) => {
+        Box::new(opcodes::Mov {
+            dst: AoArg::MP,
+            src: AoArg::from($val as u32),
+        })
+    };
+    ( mov $dst:ident,$val:tt ) => {
         Box::new(opcodes::Mov {
             dst: AoArgLowerCase::$dst.to_aoarg(),
             src: AoArg::from($val),
         })
     };
-    ( int $id:expr ) => {
+    ( int $id:tt ) => {
         Box::new(opcodes::Int { id: $id as u8 })
     };
     ( push $src:ident ) => {
@@ -40,7 +52,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( push $val:expr ) => {
+    ( push $val:tt ) => {
         Box::new(opcodes::Push {
             src: AoArg::from($val),
         })
@@ -57,7 +69,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( add $val:expr ) => {
+    ( add $val:tt ) => {
         Box::new(opcodes::Add {
             src: AoArg::from($val),
         })
@@ -67,7 +79,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( sub $val:expr ) => {
+    ( sub $val:tt ) => {
         Box::new(opcodes::Sub {
             src: AoArg::from($val),
         })
@@ -77,7 +89,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( mul $val:expr ) => {
+    ( mul $val:tt ) => {
         Box::new(opcodes::Mul {
             src: AoArg::from($val),
         })
@@ -87,7 +99,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( div $val:expr ) => {
+    ( div $val:tt ) => {
         Box::new(opcodes::Div {
             src: AoArg::from($val),
         })
@@ -97,7 +109,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( rem $val:expr ) => {
+    ( rem $val:tt ) => {
         Box::new(opcodes::Rem {
             src: AoArg::from($val),
         })
@@ -113,7 +125,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( shl $val:expr ) => {
+    ( shl $val:tt ) => {
         Box::new(opcodes::Shl {
             src: AoArg::from($val),
         })
@@ -123,7 +135,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( shr $val:expr ) => {
+    ( shr $val:tt ) => {
         Box::new(opcodes::Shr {
             src: AoArg::from($val),
         })
@@ -134,7 +146,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( and $val:expr ) => {
+    ( and $val:tt ) => {
         Box::new(opcodes::And {
             src: AoArg::from($val),
         })
@@ -144,7 +156,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( or $val:expr ) => {
+    ( or $val:tt ) => {
         Box::new(opcodes::Or {
             src: AoArg::from($val),
         })
@@ -154,7 +166,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( xor $val:expr ) => {
+    ( xor $val:tt ) => {
         Box::new(opcodes::Xor {
             src: AoArg::from($val),
         })
@@ -167,7 +179,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( band $val:expr ) => {
+    ( band $val:tt ) => {
         Box::new(opcodes::Band {
             src: AoArg::from($val),
         })
@@ -177,7 +189,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( bor $val:expr ) => {
+    ( bor $val:tt ) => {
         Box::new(opcodes::Bor {
             src: AoArg::from($val),
         })
@@ -187,7 +199,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( bxor $val:expr ) => {
+    ( bxor $val:tt ) => {
         Box::new(opcodes::Bxor {
             src: AoArg::from($val),
         })
@@ -201,7 +213,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( equ $val:expr ) => {
+    ( equ $val:tt ) => {
         Box::new(opcodes::Equ {
             src: AoArg::from($val),
         })
@@ -211,7 +223,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( neq $val:expr ) => {
+    ( neq $val:tt ) => {
         Box::new(opcodes::Neq {
             src: AoArg::from($val),
         })
@@ -221,7 +233,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( gt $val:expr ) => {
+    ( gt $val:tt ) => {
         Box::new(opcodes::Gt {
             src: AoArg::from($val),
         })
@@ -231,7 +243,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( lt $val:expr ) => {
+    ( lt $val:tt ) => {
         Box::new(opcodes::Lt {
             src: AoArg::from($val),
         })
@@ -241,7 +253,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( ge $val:expr ) => {
+    ( ge $val:tt ) => {
         Box::new(opcodes::Ge {
             src: AoArg::from($val),
         })
@@ -251,7 +263,7 @@ macro_rules! ao_asm {
             src: AoArgLowerCase::$src.to_aoarg(),
         })
     };
-    ( le $val:expr ) => {
+    ( le $val:tt ) => {
         Box::new(opcodes::Le {
             src: AoArg::from($val),
         })
@@ -285,10 +297,10 @@ macro_rules! ao_asm {
         Box::new(opcodes::Iss)
     };
 
-    ( arg $offset:expr ) => {
+    ( arg $offset:tt ) => {
         Box::new(opcodes::Arg { offset: $offset })
     };
-    ( cnf $argc:expr ) => {
+    ( cnf $argc:tt ) => {
         Box::new(opcodes::Cnf { argc: $argc })
     };
 }

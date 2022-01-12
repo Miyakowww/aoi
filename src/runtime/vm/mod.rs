@@ -1,17 +1,22 @@
+pub mod memory;
+
 use super::opcode::AoOpcode;
 use super::status::AoStatus;
 use super::types::AoType;
+use memory::Memory;
 
 /// Aoi VM.
 pub struct AoVM {
     pub pc: u32,
     pub dp: u32,
+    pub mp: u32,
     pub cs: Vec<u32>,
 
     pub dsb: u32,
     pub ca: AoType,
 
     pub ds: Vec<AoType>,
+    pub mem: Memory,
 
     pub interrupt: fn(u8, Vec<AoType>) -> Option<AoType>,
 }
@@ -46,13 +51,16 @@ impl AoVM {
     /// Create a new AoVM.
     pub fn new(int: fn(u8, Vec<AoType>) -> Option<AoType>) -> AoVM {
         AoVM {
-            dsb: 0,
             pc: 0,
             dp: 0,
+            mp: 0,
+            cs: Vec::new(),
+
+            dsb: 0,
             ca: AoType::default(),
 
             ds: Vec::new(),
-            cs: Vec::new(),
+            mem: Memory::new(),
 
             interrupt: int,
         }
@@ -146,11 +154,13 @@ impl AoVM {
     pub fn reset(&mut self) {
         self.pc = 0;
         self.dp = 0;
+        self.mp = 0;
         self.cs.clear();
 
         self.dsb = 0;
         self.ca = AoType::default();
 
         self.ds.clear();
+        self.mem = Memory::new();
     }
 }
