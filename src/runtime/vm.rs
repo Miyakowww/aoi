@@ -4,35 +4,63 @@ use super::types::AoType;
 
 /// Aoi VM.
 pub struct AoVM {
-    pub dsb: u32,
     pub pc: u32,
     pub dp: u32,
+    pub cs: Vec<u32>,
+
+    pub dsb: u32,
     pub ca: AoType,
 
     pub ds: Vec<AoType>,
-    pub gvs: Vec<AoType>,
-    pub cs: Vec<u32>,
 
     pub interrupt: fn(u8, Vec<AoType>) -> Option<AoType>,
 }
 
 impl AoVM {
+    fn default_interrupt(id: u8, args: Vec<AoType>) -> Option<AoType> {
+        match id {
+            1 => {
+                match &args[0] {
+                    AoType::AoBool(v) => print!("{}", v),
+                    AoType::AoInt(v) => print!("{}", v),
+                    AoType::AoFloat(v) => print!("{}", v),
+                    AoType::AoString(v) => print!("{}", v),
+                    _ => (),
+                }
+                None
+            }
+            2 => {
+                match &args[0] {
+                    AoType::AoBool(v) => println!("{}", v),
+                    AoType::AoInt(v) => println!("{}", v),
+                    AoType::AoFloat(v) => println!("{}", v),
+                    AoType::AoString(v) => println!("{}", v),
+                    _ => (),
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+
     /// Create a new AoVM.
-    pub fn new(int: fn(u8, Vec<AoType>) -> Option<AoType>, gv_count: i32) -> AoVM {
-        let mut vm = AoVM {
+    pub fn new(int: fn(u8, Vec<AoType>) -> Option<AoType>) -> AoVM {
+        AoVM {
             dsb: 0,
             pc: 0,
             dp: 0,
             ca: AoType::default(),
 
             ds: Vec::new(),
-            gvs: Vec::new(),
             cs: Vec::new(),
 
             interrupt: int,
-        };
-        vm.gvs.resize_with(gv_count as usize, AoType::default);
-        vm
+        }
+    }
+
+    /// Create a new AoVM with default interrupt.
+    pub fn default() -> AoVM {
+        AoVM::new(AoVM::default_interrupt)
     }
 
     /// Push a value to the data stack.
@@ -116,13 +144,13 @@ impl AoVM {
 
     /// Reset the VM.
     pub fn reset(&mut self) {
-        self.dsb = 0;
         self.pc = 0;
         self.dp = 0;
+        self.cs.clear();
+
+        self.dsb = 0;
         self.ca = AoType::default();
 
         self.ds.clear();
-        self.gvs.clear();
-        self.cs.clear();
     }
 }

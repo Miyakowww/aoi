@@ -1,64 +1,38 @@
 use aoi::*;
 
-fn interrupt(id: u8, args: Vec<AoType>) -> Option<AoType> {
-    match id {
-        1 => {
-            match &args[0] {
-                AoType::AoBool(v) => print!("{}", v),
-                AoType::AoInt(v) => print!("{}", v),
-                AoType::AoFloat(v) => print!("{}", v),
-                AoType::AoString(v) => print!("{}", v),
-                _ => (),
-            }
-            None
-        }
-        2 => {
-            match &args[0] {
-                AoType::AoBool(v) => print!("{}\n", v),
-                AoType::AoInt(v) => print!("{}\n", v),
-                AoType::AoFloat(v) => print!("{}\n", v),
-                AoType::AoString(v) => print!("{}\n", v),
-                _ => (),
-            }
-            None
-        }
-        _ => None,
-    }
-}
-
 #[test]
 fn single_step() {
-    let mut vm = AoVM::new(interrupt, 0);
+    let mut vm = AoVM::default();
 
     // calculate 1 + 2 + ... + 10
     let program = ao_program![
         //       a = 1
-        /*  0 */ push 1;
+        /*  0 */ push 1
         //       b = 0
-        /*  1 */ push 0;
+        /*  1 */ push 0
         //       while a <= 10 {
-        /*  2 */ arg 0;
-        /*  3 */ mov ca,ds;
-        /*  4 */ le 10;
-        /*  5 */ jf 15;
+        /*  2 */ arg 0
+        /*  3 */ mov ca,ds
+        /*  4 */ le 10
+        /*  5 */ jf 15
         //           b = a + b
-        /*  6 */ mov ca,ds;
-        /*  7 */ arg 1;
-        /*  8 */ add ds;
-        /*  9 */ mov ds,ca;
+        /*  6 */ mov ca,ds
+        /*  7 */ arg 1
+        /*  8 */ add ds
+        /*  9 */ mov ds,ca
         //           a = a + 1
-        /* 10 */ arg 0;
-        /* 11 */ mov ca,ds;
-        /* 12 */ inc;
-        /* 13 */ mov ds,ca;
+        /* 10 */ arg 0
+        /* 11 */ mov ca,ds
+        /* 12 */ inc
+        /* 13 */ mov ds,ca
         //       }
-        /* 14 */ jmp 2;
+        /* 14 */ jmp 2
         //       println b
-        /* 15 */ push dsb;
-        /* 16 */ arg 1;
-        /* 17 */ push ds;
-        /* 18 */ cnf 1;
-        /* 19 */ int 2;
+        /* 15 */ push dsb
+        /* 16 */ arg 1
+        /* 17 */ push ds
+        /* 18 */ cnf 1
+        /* 19 */ int 2
     ];
 
     // run
@@ -135,7 +109,7 @@ fn display_vm_status(vm: &AoVM, vm_bak: &AoVM) {
 }
 
 fn clone_vm_status(vm: &AoVM) -> AoVM {
-    let mut new_vm = AoVM::new(|_, _| None, 0);
+    let mut new_vm = AoVM::new(|_, _| None);
     new_vm.pc = vm.pc;
     new_vm.ca = vm.ca.clone();
     new_vm.dp = vm.dp;

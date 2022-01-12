@@ -37,29 +37,26 @@ impl AoAsmSerializer {
     fn serialize_arg(value: &AoArg) -> Vec<u8> {
         let mut result = Vec::new();
         match value {
-            AoArg::DSB => {
+            AoArg::PC => {
                 result.push(0x01);
             }
-            AoArg::DST => {
+            AoArg::DP => {
                 result.push(0x02);
             }
-            AoArg::PC => {
-                result.push(0x03);
+            AoArg::DSB => {
+                result.push(0x11);
             }
-            AoArg::DP => {
-                result.push(0x04);
+            AoArg::DST => {
+                result.push(0x12);
             }
             AoArg::CA => {
-                result.push(0x05);
+                result.push(0x21);
             }
             AoArg::DS => {
-                result.push(0x06);
-            }
-            AoArg::GVS => {
-                result.push(0x07);
+                result.push(0xE1);
             }
             AoArg::Imm(value) => {
-                result.push(0x08);
+                result.push(0xFF);
                 result.extend_from_slice(&AoAsmSerializer::serialize_type(value));
             }
         }
@@ -137,14 +134,13 @@ impl AoAsmSerializer {
     fn deserialize_arg(bin: &[u8], offset: &mut usize) -> Option<AoArg> {
         *offset += 1;
         match bin[*offset - 1] {
-            0x01 => Some(AoArg::DSB),
-            0x02 => Some(AoArg::DST),
-            0x03 => Some(AoArg::PC),
-            0x04 => Some(AoArg::DP),
-            0x05 => Some(AoArg::CA),
-            0x06 => Some(AoArg::DS),
-            0x07 => Some(AoArg::GVS),
-            0x08 => Some(AoArg::Imm(
+            0x01 => Some(AoArg::PC),
+            0x02 => Some(AoArg::DP),
+            0x11 => Some(AoArg::DSB),
+            0x12 => Some(AoArg::DST),
+            0x21 => Some(AoArg::CA),
+            0xE1 => Some(AoArg::DS),
+            0xFF => Some(AoArg::Imm(
                 AoAsmSerializer::deserialize_type(bin, offset).unwrap(),
             )),
             _ => None,
