@@ -1,8 +1,8 @@
 pub mod memory;
 
-use super::opcode::AoOpcode;
-use super::status::AoStatus;
-use super::types::AoType;
+use super::AoOpcode;
+use super::AoStatus;
+use super::AoType;
 use memory::Memory;
 
 /// Aoi VM.

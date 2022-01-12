@@ -1,6 +1,7 @@
-use crate::runtime::opcode::{opcodes, AoArg, AoOpcode, OpcodeArgType};
-use crate::runtime::types::AoType;
+use crate::opcodes::*;
+use crate::AoArg;
 use crate::AoProgram;
+use crate::AoType;
 
 /// Serializer for serializing and deserializing the Aoi assembly.
 pub enum AoAsmSerializer {}
@@ -157,7 +158,7 @@ impl AoAsmSerializer {
 
     fn deserialize_opcode(bin: &[u8], offset: &mut usize) -> Option<Box<dyn AoOpcode>> {
         *offset += 1;
-        let opcode = opcodes::create_opcode_by_id(bin[*offset - 1]);
+        let opcode = create_opcode_by_id(bin[*offset - 1]);
         opcode.as_ref()?;
         let mut opcode = opcode.unwrap();
 

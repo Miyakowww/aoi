@@ -17,5 +17,5 @@ fn hello_aoi() {
     } else {
         eprintln!("\nProcess terminated: {}.", status);
     }
-    println!("");
+    println!();
 }

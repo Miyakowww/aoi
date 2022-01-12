@@ -1,7 +1,7 @@
-use crate::runtime::status::AoStatus;
-use crate::runtime::types::AoType;
+use crate::AoStatus;
+use crate::AoType;
 
-pub(crate) struct AoTypeBinOper {
+pub(super) struct AoTypeBinOper {
     name: &'static str,
 
     bool_oper: Option<fn(bool, bool) -> bool>,
@@ -77,7 +77,7 @@ static BIN_OPER_NONE: AoTypeBinOper = AoTypeBinOper {
 macro_rules! bop {
     ( $name:ident, $dname:tt, $( $fname:ident : $fvalue:expr ),*, ) => {
         #[allow(clippy::needless_update)]
-        pub(crate) static $name: AoTypeBinOper = AoTypeBinOper {
+        pub(super) static $name: AoTypeBinOper = AoTypeBinOper {
             name: stringify!($dname),
             $(
                 $fname: $fvalue,

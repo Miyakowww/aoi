@@ -132,5 +132,5 @@ fn bubble_sort() {
     } else {
         eprintln!("\nProcess terminated: {}.", status);
     }
-    println!("");
+    println!();
 }

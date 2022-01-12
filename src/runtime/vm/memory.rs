@@ -1,4 +1,4 @@
-use crate::runtime::types::AoType;
+use crate::AoType;
 
 struct Chip {
     data: Vec<AoType>,

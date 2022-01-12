@@ -79,16 +79,16 @@ fn display_vm_status(vm: &AoVM, vm_bak: &AoVM) {
     println!("\n[VM Status]");
 
     compare_disp!(PC, vm, vm_bak, pc);
-    print!("\n");
+    println!();
     compare_disp!(CA, vm, vm_bak, ca);
-    print!("\n");
+    println!();
 
     compare_disp!(DP, vm, vm_bak, dp);
     print!(", ");
     compare_disp!(DSB, vm, vm_bak, dsb);
     print!(", ");
     compare_disp!(DST, vm, vm_bak, ds.len());
-    print!("\n");
+    println!();
 
     print!("DS: ");
     for i in 0..vm.ds.len() {

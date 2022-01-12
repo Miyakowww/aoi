@@ -1,4 +1,29 @@
-use super::*;
+use std::fmt::Display;
+
+use super::AoArg;
+use crate::AoStatus;
+use crate::AoType;
+use crate::AoVM;
+
+#[allow(non_camel_case_types)]
+pub enum OpcodeArgType {
+    NoArg,
+    u8(u8),
+    u32(u32),
+    bool(bool),
+    AoArg(AoArg),
+    AoArg2(AoArg, AoArg),
+}
+
+pub trait Serializable {
+    fn get_id(&self) -> u8;
+    fn get_args(&self) -> OpcodeArgType;
+    fn set_args(&mut self, args: OpcodeArgType);
+}
+
+pub trait AoOpcode: Display + Serializable {
+    fn execute(&self, vm: &mut AoVM) -> AoStatus;
+}
 
 macro_rules! impl_disp {
     ( $t:ty, $d:expr ) => {
