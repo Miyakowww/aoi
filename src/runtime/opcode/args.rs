@@ -39,7 +39,7 @@ impl AoArg {
     /// let mut vm = AoVM::default();
     /// assert_eq!(AoArg::CA.get_value(&mut vm), AoType::default());
     /// ```
-    pub fn get_value(&self, vm: &mut AoVM) -> AoType {
+    pub fn get_value(&self, vm: &AoVM) -> AoType {
         match self {
             AoArg::PC => AoType::AoPtr(vm.pc),
             AoArg::DP => AoType::AoPtr(vm.dp),
@@ -48,7 +48,7 @@ impl AoArg {
             AoArg::DST => AoType::AoPtr(vm.ds.len() as u32),
             AoArg::CA => vm.ca.clone(),
             AoArg::DS => vm.ds[vm.dp as usize].clone(),
-            AoArg::MEM => vm.mem.get(vm.mp).clone(),
+            AoArg::MEM => vm.mem.get(vm.mp),
             AoArg::Imm(value) => value.clone(),
         }
     }
