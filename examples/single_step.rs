@@ -1,7 +1,6 @@
 use aoi::*;
 
-#[test]
-fn single_step() {
+fn main() {
     let mut vm = AoVM::default();
 
     // calculate 1 + 2 + ... + 10

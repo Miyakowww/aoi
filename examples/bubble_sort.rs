@@ -1,8 +1,7 @@
-#![recursion_limit = "107"]
+#![recursion_limit = "128"]
 use aoi::*;
 
-#[test]
-fn bubble_sort() {
+fn main() {
     let mut vm = AoVM::default();
     let program = ao_program![
         //        arr = [ 3, 19, 5, 15, 1, 4, 16, 8 ]

@@ -1,7 +1,6 @@
 use aoi::*;
 
-#[test]
-fn hello_aoi() {
+fn main() {
     let mut vm = AoVM::default();
     let program = ao_program![
         push dsb
