@@ -10,14 +10,23 @@ macro_rules! ao_asm {
     ( ret ) => {
         Box::new(opcodes::Ret)
     };
-    ( jmp $addr:literal ) => {
+    ( jmp $addr:expr ) => {
         Box::new(opcodes::Jmp { addr: $addr })
     };
-    ( jt $addr:literal ) => {
+    ( jmpa $addr:literal ) => {
+        Box::new(opcodes::Jmpa { addr: $addr })
+    };
+    ( jt $addr:expr ) => {
         Box::new(opcodes::Jt { addr: $addr })
     };
-    ( jf $addr:literal ) => {
+    ( jta $addr:literal ) => {
+        Box::new(opcodes::Jta { addr: $addr })
+    };
+    ( jf $addr:expr ) => {
         Box::new(opcodes::Jf { addr: $addr })
+    };
+    ( jfa $addr:literal ) => {
+        Box::new(opcodes::Jfa { addr: $addr })
     };
 
     ( mov $dst:ident,$src:ident ) => {

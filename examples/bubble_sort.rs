@@ -30,7 +30,7 @@ fn main() {
         /*  20 */ add 1
         /*  21 */ arg 0
         /*  22 */ lt ds
-        /*  23 */ jf 80
+        /*  23 */ jfa 80
         //            for (j = 0; j + 1 + i < len; j++) {
         /*  24 */ push 0
         /*  25 */ arg 2
@@ -40,7 +40,7 @@ fn main() {
         /*  29 */ add ds
         /*  30 */ arg 0
         /*  31 */ lt ds
-        /*  32 */ jf 74
+        /*  32 */ jfa 74
         //                if (arr[j + 1] < arr[j]) {
         /*  33 */ arg 2
         /*  34 */ mov ca,ds
@@ -56,7 +56,7 @@ fn main() {
         /*  44 */ pop ca
         /*  45 */ lt ds
         /*  46 */ pop
-        /*  47 */ jf 69
+        /*  47 */ jfa 69
         //                    tmp = arr[j + 1];
         /*  48 */ arg 2
         /*  49 */ mov ca,ds
@@ -87,14 +87,14 @@ fn main() {
         /*  70 */ mov ca,ds
         /*  71 */ add 1
         /*  72 */ mov ds,ca
-        /*  73 */ jmp 25
+        /*  73 */ jmpa 25
         /*  74 */ pop
         //        }
         /*  75 */ arg 1
         /*  76 */ mov ca,ds
         /*  77 */ add 1
         /*  78 */ mov ds,ca
-        /*  79 */ jmp 18
+        /*  79 */ jmpa 18
         /*  80 */ pop
         //        for (i = 0; i < len; i++) {
         /*  81 */ push 0
@@ -102,7 +102,7 @@ fn main() {
         /*  83 */ mov ca,ds
         /*  84 */ arg 0
         /*  85 */ lt ds
-        /*  86 */ jf 103
+        /*  86 */ jfa 103
         //            print(arr[i] + ", ");
         /*  87 */ push dsb
         /*  88 */ arg 1
@@ -120,7 +120,7 @@ fn main() {
         /*  99 */ mov ca,ds
         /* 100 */ add 1
         /* 101 */ mov ds,ca
-        /* 102 */ jmp 82
+        /* 102 */ jmpa 82
         /* 103 */ pop
     ];
 

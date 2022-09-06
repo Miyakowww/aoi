@@ -9,6 +9,7 @@ use crate::AoVM;
 pub enum OpcodeArgType {
     NoArg,
     u8(u8),
+    i32(i32),
     u32(u32),
     bool(bool),
     AoArg(AoArg),
@@ -174,11 +175,26 @@ opcode!(Ret, 0x11, "ret", (&self, vm) {
     }
 });
 
-opcode!(Jmp, 0x12, "jmp {}", u32 addr, (&self, vm) {
+opcode!(Jmp, 0x12, "jmp {}", i32 addr, (&self, vm) {
+    vm.pc = (vm.pc as i32 + self.addr - 1) as u32;
+});
+
+opcode!(Jmpa, 0x13, "jmpa {}", u32 addr, (&self, vm) {
     vm.pc = self.addr;
 });
 
-opcode!(Jt, 0x13, "jt {}", u32 addr, (&self, vm) {
+opcode!(Jt, 0x14, "jt {}", i32 addr, (&self, vm) {
+    if match vm.ca {
+        AoType::AoBool(b) => b,
+        AoType::AoInt(i) => i != 0,
+        AoType::AoFloat(f) => f != 0.0,
+        _ => false,
+    } {
+        vm.pc = (vm.pc as i32 + self.addr - 1) as u32;
+    }
+});
+
+opcode!(Jta, 0x15, "jta {}", u32 addr, (&self, vm) {
     if match vm.ca {
         AoType::AoBool(b) => b,
         AoType::AoInt(i) => i != 0,
@@ -189,7 +205,18 @@ opcode!(Jt, 0x13, "jt {}", u32 addr, (&self, vm) {
     }
 });
 
-opcode!(Jf, 0x14, "jf {}", u32 addr, (&self, vm) {
+opcode!(Jf, 0x16, "jf {}", i32 addr, (&self, vm) {
+    if !match vm.ca {
+        AoType::AoBool(b) => b,
+        AoType::AoInt(i) => i != 0,
+        AoType::AoFloat(f) => f != 0.0,
+        _ => false,
+    } {
+        vm.pc = (vm.pc as i32 + self.addr - 1) as u32;
+    }
+});
+
+opcode!(Jfa, 0x17, "jfa {}", u32 addr, (&self, vm) {
     if !match vm.ca {
         AoType::AoBool(b) => b,
         AoType::AoInt(i) => i != 0,
@@ -635,8 +662,11 @@ pub fn create_opcode_by_id(id: u8) -> Option<Box<dyn AoOpcode>> {
         0x10 => Some(Box::new(Call { addr: 0 })),
         0x11 => Some(Box::new(Ret)),
         0x12 => Some(Box::new(Jmp { addr: 0 })),
-        0x13 => Some(Box::new(Jt { addr: 0 })),
-        0x14 => Some(Box::new(Jf { addr: 0 })),
+        0x13 => Some(Box::new(Jmpa { addr: 0 })),
+        0x14 => Some(Box::new(Jt { addr: 0 })),
+        0x15 => Some(Box::new(Jta { addr: 0 })),
+        0x16 => Some(Box::new(Jf { addr: 0 })),
+        0x17 => Some(Box::new(Jfa { addr: 0 })),
 
         0x20 => Some(Box::new(Mov {
             src: AoArg::CA,

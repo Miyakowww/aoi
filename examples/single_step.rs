@@ -13,7 +13,7 @@ fn main() {
         /*  2 */ arg 0
         /*  3 */ mov ca,ds
         /*  4 */ le 10
-        /*  5 */ jf 15
+        /*  5 */ jfa 15
         //           b = a + b
         /*  6 */ mov ca,ds
         /*  7 */ arg 1
@@ -25,7 +25,7 @@ fn main() {
         /* 12 */ inc
         /* 13 */ mov ds,ca
         //       }
-        /* 14 */ jmp 2
+        /* 14 */ jmpa 2
         //       println b
         /* 15 */ push dsb
         /* 16 */ arg 1

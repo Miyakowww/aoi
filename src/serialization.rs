@@ -77,6 +77,9 @@ impl AoAsmSerializer {
             OpcodeArgType::u8(value) => {
                 result.extend_from_slice(value.to_le_bytes().as_ref());
             }
+            OpcodeArgType::i32(value) => {
+                result.extend_from_slice(value.to_le_bytes().as_ref());
+            }
             OpcodeArgType::u32(value) => {
                 result.extend_from_slice(value.to_le_bytes().as_ref());
             }
@@ -167,6 +170,12 @@ impl AoAsmSerializer {
             OpcodeArgType::u8(_) => {
                 *offset += 1;
                 opcode.set_args(OpcodeArgType::u8(bin[*offset - 1]));
+            }
+            OpcodeArgType::i32(_) => {
+                *offset += 4;
+                opcode.set_args(OpcodeArgType::i32(i32::from_le_bytes(
+                    bin[*offset - 4..*offset].try_into().unwrap(),
+                )));
             }
             OpcodeArgType::u32(_) => {
                 *offset += 4;
