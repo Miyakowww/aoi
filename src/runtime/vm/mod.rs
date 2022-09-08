@@ -14,6 +14,7 @@ pub struct AoVM {
 
     pub dsb: u32,
     pub ca: AoType,
+    pub cb: AoType,
 
     pub ds: Vec<AoType>,
     pub mem: Memory,
@@ -58,6 +59,7 @@ impl AoVM {
 
             dsb: 0,
             ca: AoType::default(),
+            cb: AoType::default(),
 
             ds: Vec::new(),
             mem: Memory::new(),
@@ -159,6 +161,7 @@ impl AoVM {
 
         self.dsb = 0;
         self.ca = AoType::default();
+        self.cb = AoType::default();
 
         self.ds.clear();
         self.mem = Memory::new();

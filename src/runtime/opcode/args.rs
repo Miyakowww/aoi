@@ -17,8 +17,9 @@ pub enum AoArg {
     DSB,
     /// Pointer to the top of the stack.
     DST,
-    /// Register for calculation.
+    /// Registers for calculation.
     CA,
+    CB,
     /// Stack.
     DS,
     /// Memory.
@@ -47,6 +48,7 @@ impl AoArg {
             AoArg::DSB => AoType::AoPtr(vm.dsb as u32),
             AoArg::DST => AoType::AoPtr(vm.ds.len() as u32),
             AoArg::CA => vm.ca.clone(),
+            AoArg::CB => vm.cb.clone(),
             AoArg::DS => vm.ds[vm.dp as usize].clone(),
             AoArg::MEM => vm.mem.get(vm.mp),
             AoArg::Imm(value) => value.clone(),
@@ -106,6 +108,10 @@ impl AoArg {
                 vm.ca = value;
                 AoStatus::Ok
             }
+            AoArg::CB => {
+                vm.cb = value;
+                AoStatus::Ok
+            }
             AoArg::DS => {
                 vm.ds[vm.dp as usize] = value;
                 AoStatus::Ok
@@ -130,6 +136,7 @@ impl Display for AoArg {
             AoArg::DSB => write!(f, "dsb"),
             AoArg::DST => write!(f, "dst"),
             AoArg::CA => write!(f, "ca"),
+            AoArg::CB => write!(f, "cb"),
             AoArg::DS => write!(f, "ds"),
             AoArg::MEM => write!(f, "mem"),
             AoArg::Imm(v) => write!(f, "{}", v),
@@ -169,6 +176,7 @@ pub enum AoArgLowerCase {
     dsb,
     dst,
     ca,
+    cb,
     ds,
     mem,
     imm(AoType),
@@ -183,6 +191,7 @@ impl AoArgLowerCase {
             AoArgLowerCase::dsb => AoArg::DSB,
             AoArgLowerCase::dst => AoArg::DST,
             AoArgLowerCase::ca => AoArg::CA,
+            AoArgLowerCase::cb => AoArg::CB,
             AoArgLowerCase::ds => AoArg::DS,
             AoArgLowerCase::mem => AoArg::MEM,
             AoArgLowerCase::imm(v) => AoArg::Imm(v.clone()),

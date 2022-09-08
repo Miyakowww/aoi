@@ -72,6 +72,9 @@ macro_rules! ao_asm {
     ( pop ca ) => {
         Box::new(opcodes::Pop { to_ca: true })
     };
+    ( popn $count:literal ) => {
+        Box::new(opcodes::Popn { count: $count })
+    };
 
     ( add $src:ident ) => {
         Box::new(opcodes::Add {

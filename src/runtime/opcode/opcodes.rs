@@ -274,6 +274,15 @@ opcode!(Pop, 0x23, "pop ca", "pop", bool to_ca, (&self, vm) {
     }
 });
 
+opcode!(Popn, 0x24, "popn {}", u32 count, (&self, vm) {
+    let count = self.count as usize;
+    if vm.ds.len() >= count {
+        vm.ds.resize(vm.ds.len() - count, AoType::default());
+    } else {
+        return AoStatus::DataStackUnderflow;
+    }
+});
+
 opcode!(Add, 0x30, "add {}", src, (&self, vm) {
     let res = vm.ca.clone() + self.src.get_value(vm);
     if let AoStatus::Return(value) = res {
@@ -675,6 +684,7 @@ pub fn create_opcode_by_id(id: u8) -> Option<Box<dyn AoOpcode>> {
         0x21 => Some(Box::new(Int { id: 0 })),
         0x22 => Some(Box::new(Push { src: AoArg::CA })),
         0x23 => Some(Box::new(Pop { to_ca: false })),
+        0x24 => Some(Box::new(Popn { count: 0 })),
 
         0x30 => Some(Box::new(Add { src: AoArg::CA })),
         0x31 => Some(Box::new(Sub { src: AoArg::CA })),

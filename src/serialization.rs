@@ -56,6 +56,9 @@ impl AoAsmSerializer {
             AoArg::CA => {
                 result.push(0x21);
             }
+            AoArg::CB => {
+                result.push(0x22);
+            }
             AoArg::DS => {
                 result.push(0xE1);
             }
@@ -150,6 +153,7 @@ impl AoAsmSerializer {
             0x11 => Some(AoArg::DSB),
             0x12 => Some(AoArg::DST),
             0x21 => Some(AoArg::CA),
+            0x22 => Some(AoArg::CB),
             0xE1 => Some(AoArg::DS),
             0xE2 => Some(AoArg::MEM),
             0xFF => Some(AoArg::Imm(
